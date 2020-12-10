@@ -23,11 +23,32 @@ namespace ModemAnalysis
 		public MainWindow()
 		{
 			InitializeComponent();
+			//Loaded += MyWindow_Loaded;
 		}
 
-		private void Button_Click(object sender, RoutedEventArgs e)
+		public void printDebug(string str)
 		{
+			richTextBox_PrintAll.AppendText(str);
+			richTextBox_PrintAll.AppendText(Environment.NewLine);
+			richTextBox_PrintAll.ScrollToEnd();
+		}
 
+		private void Button_Click_Connect(object sender, RoutedEventArgs e)
+		{
+			printDebug("Prisijungiam prie porto");
+		}
+
+		private void MyWindow_Loaded(object sender, RoutedEventArgs e)
+		{
+			printDebug("Uzkurem programa");
+		}
+
+		private void Button_Click_Start(object sender, RoutedEventArgs e)
+		{
+			printDebug("Startuojam testa");
 		}
 	}
+
+
+
 }
