@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Management;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -20,11 +22,13 @@ namespace ModemAnalysis
 	/// </summary>
 	public partial class MainWindow : Window
 	{
-		public MainWindow()
+        private bool isConnected = false;
+        public MainWindow()
 		{
 			InitializeComponent();
-			//Loaded += MyWindow_Loaded;
-		}
+            //Loaded += MyWindow_Loaded;
+            InitPortNames();
+        }
 
 		public void printDebug(string str)
 		{
@@ -36,7 +40,16 @@ namespace ModemAnalysis
 		private void Button_Click_Connect(object sender, RoutedEventArgs e)
 		{
 			printDebug("Prisijungiam prie porto");
-		}
+
+            if (isConnected == false) 
+            {
+                OpenPort();
+            }
+            else
+            {
+                ClosePort();
+            }
+        }
 
 		private void MyWindow_Loaded(object sender, RoutedEventArgs e)
 		{
@@ -47,7 +60,45 @@ namespace ModemAnalysis
 		{
 			printDebug("Startuojam testa");
 		}
-	}
+
+        private void InitPortNames()
+        {
+            comboBox_PortSelection.Items.Clear();
+            try
+            {
+                ManagementObjectSearcher searcher = new ManagementObjectSearcher("root\\CIMV2", "SELECT * FROM Win32_PnPEntity"); //returns information about the devices found in Device Manager. https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/win32-pnpentity
+
+                foreach (ManagementObject queryObj in searcher.Get()) 
+                {
+                    if (queryObj["Caption"] != null)
+                    {
+                        if (queryObj["Caption"].ToString().Contains("(COM")) //Finds all devices with caption "COM"
+                        {
+                            string comPortName = queryObj["Caption"].ToString().Split('(', ')')[1];
+                            comboBox_PortSelection.Items.Add(comPortName + " - " + queryObj["Description"]);
+                         }
+                    }
+                }
+            }
+            catch (ManagementException e)
+            {
+                MessageBox.Show(e.Message);
+            }
+
+        }
+
+        void OpenPort()
+        {
+
+        }
+
+        void ClosePort()
+        {
+
+        }
+
+
+    }
 
 
 
