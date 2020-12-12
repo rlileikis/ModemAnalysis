@@ -15,7 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-    
+
 namespace ModemAnalysis
 {
 	/// <summary>
@@ -24,6 +24,8 @@ namespace ModemAnalysis
 	public partial class MainWindow : Window
 	{
         private List<ApnSetting> ApnSettings { get; set; }
+
+		readonly Communication Comm = new Communication();
 
         private bool isConnected = false;
         public MainWindow()
@@ -43,7 +45,6 @@ namespace ModemAnalysis
 		private void Button_Click_Connect(object sender, RoutedEventArgs e)
 		{
 			//printDebug("Prisijungiam prie porto");
-
             if (isConnected == false) 
             {
                 OpenPort();
@@ -62,7 +63,19 @@ namespace ModemAnalysis
 		private void Button_Click_Start(object sender, RoutedEventArgs e)
 		{
 			printDebug("Startuojam testa");
-		}
+            if(Comm.GotoTestMode())
+			{
+                printDebug("Perejom i test mode");
+                
+            }
+            else
+			{
+                printDebug("Device is disconnected, trying to reconnect.");
+                OpenPort();
+            }
+                
+
+        }
 
         private void InitPortNames()
         {
@@ -91,12 +104,12 @@ namespace ModemAnalysis
         }
         public void OpenPort()
         {
-            Communication OpenCom = new Communication();
+
             if (comboBox_PortSelection.SelectedIndex > -1)
             {
                 var trimmedComPortName = comboBox_PortSelection.Text.Split(' ')[0];
 
-                if (OpenCom.OpenPort(trimmedComPortName))
+                if (Comm.OpenPort(trimmedComPortName))
                 {
                     btn_Connect.Content = "Disconnect";
                     comboBox_PortSelection.IsEnabled = false;
@@ -115,16 +128,13 @@ namespace ModemAnalysis
 
         void ClosePort()
         {
-            Communication CloseCom = new Communication();
             var trimmedComPortName = comboBox_PortSelection.Text.Split(' ')[0];
-            CloseCom.ClosePort();
+            Comm.ClosePort();
 			isConnected = false;
             btn_Connect.Content = "Connect";
             comboBox_PortSelection.IsEnabled = true;
 			printDebug($">>> Port {trimmedComPortName} disconnected");
 		}
-
-
 
 
     }

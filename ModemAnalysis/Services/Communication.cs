@@ -32,11 +32,15 @@ namespace ModemAnalysis
 		public bool OpenPort(string portName)
 		{
 			serialPort.PortName = portName;
+			serialPort.BaudRate = 115200;
 			serialPort.Handshake = Handshake.None;
 			serialPort.ReadTimeout = 500;
 			serialPort.DataBits = 8;
 			serialPort.Parity = Parity.None;
-			serialPort.StopBits = StopBits.One;			
+			serialPort.StopBits = StopBits.One;
+
+			//serialPort.DataReceived += new SerialDataReceivedEventHandler(DataReceivedHandler);
+
 			try
 			{
 				serialPort.Open();
@@ -63,6 +67,33 @@ namespace ModemAnalysis
 				}
 			}
 		}
+
+		public bool GotoTestMode()
+		{
+			if (serialPort.IsOpen == true)
+			{
+				serialPort.Write("SET,SYSTEM,TEST_MODE,3;\r\n");
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+
+		public bool WritePort(byte[] data)
+		{
+			if (serialPort.IsOpen == true)
+			{
+				serialPort.Write(data, 0, data.Length);
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+
 
 
 	}
