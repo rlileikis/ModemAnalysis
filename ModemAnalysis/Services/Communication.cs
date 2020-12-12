@@ -118,8 +118,12 @@ namespace ModemAnalysis
 				}
 				ProcessReceived();
 			}
-			catch { }
+			catch
+			{
+
+			}
 		}
+
 
 		public void ProcessReceived()
 		{
@@ -134,13 +138,13 @@ namespace ModemAnalysis
 		
 				if (Convert.ToChar(result) == '\r')
 				{
-					MessageBox.Show(new string(lineBuffer));
+					string(lineBuffer) //reikia perduoti i MainWindow
+
+
 					lineBuffer[index] = Convert.ToChar(result);
 					lineBuffer[index + 1] = '\n';
 					index += 2;
-					
-					//(lineBuffer, index, "");
-					lineBuffer = new char[Communication.bufferSize];
+					lineBuffer = new char[bufferSize];
 					index = 0;
 				}
 				else
