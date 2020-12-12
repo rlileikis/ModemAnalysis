@@ -35,7 +35,7 @@ namespace ModemAnalysis
             InitPortNames();
         }
 
-		public void printDebug(string str)
+		public void PrintDebug(string str)
 		{
 			richTextBox_PrintAll.AppendText(str);
 			richTextBox_PrintAll.AppendText(Environment.NewLine);
@@ -57,24 +57,29 @@ namespace ModemAnalysis
 
 		private void MyWindow_Loaded(object sender, RoutedEventArgs e)
 		{
-			printDebug("Uzkurem programa");
+			PrintDebug("Uzkurem programa");
 		}
 
 		private void Button_Click_Start(object sender, RoutedEventArgs e)
 		{
-			printDebug("Startuojam testa");
+			PrintDebug("Startuojam testa");
             if(Comm.GotoTestMode())
 			{
-                printDebug("Perejom i test mode");
+                PrintDebug("Perejom i test mode");
                 
             }
             else
 			{
-                printDebug("Device is disconnected, trying to reconnect.");
+                PrintDebug("Device is disconnected, trying to reconnect.");
                 OpenPort();
             }
                 
 
+        }
+
+        private void Button_Test_Click(object sender, RoutedEventArgs e)
+        {
+            Comm.WritePort("AT");
         }
 
         private void InitPortNames()
@@ -114,11 +119,11 @@ namespace ModemAnalysis
                     btn_Connect.Content = "Disconnect";
                     comboBox_PortSelection.IsEnabled = false;
                     isConnected = true;
-                    printDebug($">>> Connected to port {trimmedComPortName}");
+                    PrintDebug($">>> Connected to port {trimmedComPortName}");
                 }
                 else
                 {
-                    printDebug($">>> Can't connect to port {trimmedComPortName}");
+                    PrintDebug($">>> Can't connect to port {trimmedComPortName}");
                 }
             }
             else MessageBox.Show("Choose port");
@@ -133,11 +138,11 @@ namespace ModemAnalysis
 			isConnected = false;
             btn_Connect.Content = "Connect";
             comboBox_PortSelection.IsEnabled = true;
-			printDebug($">>> Port {trimmedComPortName} disconnected");
+			PrintDebug($">>> Port {trimmedComPortName} disconnected");
 		}
 
 
-    }
+	}
 
 
 
