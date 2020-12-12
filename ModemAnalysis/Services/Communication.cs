@@ -32,6 +32,8 @@ namespace ModemAnalysis
 
 		public bool OpenPort(string portName)
 		{
+			try
+			{
 			serialPort.PortName = portName;
 			serialPort.BaudRate = 115200;
 			serialPort.Handshake = Handshake.None;
@@ -41,8 +43,7 @@ namespace ModemAnalysis
 			serialPort.StopBits = StopBits.One;
 
 			serialPort.DataReceived += new SerialDataReceivedEventHandler(DataReceivedHandler);
-			try
-			{
+
 				serialPort.Open();
 				return true;
 			}
@@ -72,11 +73,15 @@ namespace ModemAnalysis
 			ResetQueue();
 		}
 
-		public bool GotoTestMode()
+		public bool GotoTestMode(string port)
 		{
 			if (serialPort.IsOpen == true)
 			{
 				WritePort("SET,SYSTEM,TEST_MODE,3;"); //Access Test Mode in the device
+				while(!OpenPort(port))
+				{
+					//Device restarts itself, so we are waiting for it to be connected again.
+				}
 				return true;
 			}
 			else
@@ -138,9 +143,7 @@ namespace ModemAnalysis
 		
 				if (Convert.ToChar(result) == '\r')
 				{
-					string(lineBuffer) //reikia perduoti i MainWindow
-
-
+					MessageBox.Show(new string(lineBuffer));
 					lineBuffer[index] = Convert.ToChar(result);
 					lineBuffer[index + 1] = '\n';
 					index += 2;

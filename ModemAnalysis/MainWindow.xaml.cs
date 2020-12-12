@@ -28,6 +28,8 @@ namespace ModemAnalysis
 		readonly Communication Comm = new Communication();
 
         private bool isConnected = false;
+
+        string trimmedComPortName = "";
         public MainWindow()
 		{
             InitializeComponent();
@@ -63,7 +65,7 @@ namespace ModemAnalysis
 		private void Button_Click_Start(object sender, RoutedEventArgs e)
 		{
 			PrintDebug("Startuojam testa");
-            if(Comm.GotoTestMode())
+            if(Comm.GotoTestMode(trimmedComPortName))
 			{
                 PrintDebug("Perejom i test mode");
                 
@@ -95,8 +97,8 @@ namespace ModemAnalysis
                     {
                         if (queryObj["Caption"].ToString().Contains("(COM")) //Finds all devices with caption "COM"
                         {
-                            string comPortName = queryObj["Caption"].ToString().Split('(', ')')[1];
-                            comboBox_PortSelection.Items.Add(comPortName + " - " + queryObj["Description"]);
+                            trimmedComPortName = queryObj["Caption"].ToString().Split('(', ')')[1];
+                            comboBox_PortSelection.Items.Add(trimmedComPortName + " - " + queryObj["Description"]);
                          }
                     }
                 }
@@ -112,7 +114,7 @@ namespace ModemAnalysis
 
             if (comboBox_PortSelection.SelectedIndex > -1)
             {
-                var trimmedComPortName = comboBox_PortSelection.Text.Split(' ')[0];
+                //var trimmedComPortName = comboBox_PortSelection.Text.Split(' ')[0];
 
                 if (Comm.OpenPort(trimmedComPortName))
                 {
