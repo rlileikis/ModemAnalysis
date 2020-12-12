@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ModemAnalysis.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management;
@@ -14,7 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-
+    
 namespace ModemAnalysis
 {
 	/// <summary>
@@ -22,10 +23,12 @@ namespace ModemAnalysis
 	/// </summary>
 	public partial class MainWindow : Window
 	{
+        private List<ApnSetting> ApnSettings { get; set; }
+
         private bool isConnected = false;
         public MainWindow()
 		{
-			InitializeComponent();
+            InitializeComponent();
             //Loaded += MyWindow_Loaded;
             InitPortNames();
         }
@@ -39,7 +42,7 @@ namespace ModemAnalysis
 
 		private void Button_Click_Connect(object sender, RoutedEventArgs e)
 		{
-			printDebug("Prisijungiam prie porto");
+			//printDebug("Prisijungiam prie porto");
 
             if (isConnected == false) 
             {
@@ -86,16 +89,42 @@ namespace ModemAnalysis
             }
 
         }
-
-        void OpenPort()
+        public void OpenPort()
         {
+            Communication OpenCom = new Communication();
+            if (comboBox_PortSelection.SelectedIndex > -1)
+            {
+                var trimmedComPortName = comboBox_PortSelection.Text.Split(' ')[0];
+
+                if (OpenCom.OpenPort(trimmedComPortName))
+                {
+                    btn_Connect.Content = "Disconnect";
+                    comboBox_PortSelection.IsEnabled = false;
+                    isConnected = true;
+                    printDebug($">>> Connected to port {trimmedComPortName}");
+                }
+                else
+                {
+                    printDebug($">>> Can't connect to port {trimmedComPortName}");
+                }
+            }
+            else MessageBox.Show("Choose port");
+
 
         }
 
         void ClosePort()
         {
+            Communication CloseCom = new Communication();
+            var trimmedComPortName = comboBox_PortSelection.Text.Split(' ')[0];
+            CloseCom.ClosePort();
+			isConnected = false;
+            btn_Connect.Content = "Connect";
+            comboBox_PortSelection.IsEnabled = true;
+			printDebug($">>> Port {trimmedComPortName} disconnected");
+		}
 
-        }
+
 
 
     }
