@@ -76,7 +76,7 @@ namespace ModemAnalysis
 		{
 			if (serialPort.IsOpen == true)
 			{
-				WritePort("SET,SYSTEM,TEST_MODE,3;");
+				WritePort("SET,SYSTEM,TEST_MODE,3;"); //Access Test Mode in the device
 				return true;
 			}
 			else
@@ -131,10 +131,7 @@ namespace ModemAnalysis
 					break;
 				}
 
-				// For Debugging
-				//Console.Write(Convert.ToChar(result));
-				
-
+		
 				if (Convert.ToChar(result) == '\r')
 				{
 					MessageBox.Show(new string(lineBuffer));
