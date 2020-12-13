@@ -111,11 +111,22 @@ namespace ModemAnalysis
 		}
 
 
-		public bool InitializeModem(string apn, string user, string pass)
+		public string InitializeModem(string apn, string user, string pass)
 		{
+			if (serialPort.IsOpen == true)
+			{
+				WritePort("AT+CPIN?");
+				//WritePort("AT+COPS?");
+				//WritePort("AT+CREG?");
+				//MessageBox.Show(new string(lineBuffer));
 
+				return "";
+			}
+			else
+			{
+				return "";
+			}
 
-			return false;
 		}
 
 
@@ -137,6 +148,7 @@ namespace ModemAnalysis
 		private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
 		{
 			SerialPort sp = (SerialPort)sender;
+			ProcessReceivedEventArgs args = new ProcessReceivedEventArgs();
 			try
 			{
 				int readBytes = sp.BytesToRead;
@@ -150,7 +162,32 @@ namespace ModemAnalysis
 						break;
 					}
 				}
-				ProcessinamReceived();
+				while (true)
+				{
+					int result = Queue_PopByte();
+					if (result == (-1))
+					{
+						break;
+					}
+					if (Convert.ToChar(result) == '\r')
+					{
+						args.message = new string(lineBuffer);
+						OnProcessReceived(args);
+						lineBuffer[index] = Convert.ToChar(result);
+						lineBuffer[index + 1] = '\n';
+						index += 2;
+						lineBuffer = new char[bufferSize];
+						index = 0;
+					}
+					else
+					{
+						if (Convert.ToChar(result) != '\n')
+						{
+							lineBuffer[index] = Convert.ToChar(result);
+							index++;
+						}
+					}
+				}
 			}
 			catch
 			{
@@ -158,38 +195,6 @@ namespace ModemAnalysis
 			}
 		}
 
-
-		public void ProcessinamReceived()
-		{
-			ProcessReceivedEventArgs args = new ProcessReceivedEventArgs();
-			while (true)
-			{
-				int result = Queue_PopByte();
-				if (result == (-1))
-				{
-					break;
-				}
-				if (Convert.ToChar(result) == '\r')
-				{
-					args.message = new string(lineBuffer);
-					OnProcessReceived(args);
-					lineBuffer[index] = Convert.ToChar(result);
-					lineBuffer[index + 1] = '\n';
-					index += 2;
-					lineBuffer = new char[bufferSize];
-					index = 0;
-				}
-				else
-				{
-					if (Convert.ToChar(result) != '\n')
-					{
-						lineBuffer[index] = Convert.ToChar(result);
-						index++;
-					}
-				}
-			}
-
-		}
 		protected virtual void OnProcessReceived(ProcessReceivedEventArgs e)
 		{
 			EventHandler<ProcessReceivedEventArgs> handler = ProcessReceived;
@@ -198,8 +203,6 @@ namespace ModemAnalysis
 				handler(this, e);
 			}
 		}
-
-
 
 		public void ResetBuffer()
 		{

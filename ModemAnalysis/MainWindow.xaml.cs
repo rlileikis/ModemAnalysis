@@ -83,7 +83,9 @@ namespace ModemAnalysis
         private void Button_Test_ModemInit(object sender, RoutedEventArgs e)
         {
             //Comm.WritePort("ATI");
-            TestSteps.SendAT();
+            var response = Comm.InitializeModem(txtBx_APN.Text, txtBx_Pass.Text, txtBx_User.Text);
+            PrintDebug(response);
+            //TestSteps.SendAT();
         }
 
         private void InitPortNames()
