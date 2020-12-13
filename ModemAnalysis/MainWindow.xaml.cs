@@ -34,7 +34,7 @@ namespace ModemAnalysis
 
         public void c_ProcessReceived(object sender, ProcessReceivedEventArgs e)
         {
-            PrintDebug(e.message);
+            this.Dispatcher.Invoke(() => { PrintDebug(e.message); });
         }
 
         public void PrintDebug(string str)
@@ -82,7 +82,7 @@ namespace ModemAnalysis
 
         private void Button_Test_ModemInit(object sender, RoutedEventArgs e)
         {
-            Comm.WritePort("AT");
+            Comm.WritePort("ATI");
         }
 
         private void InitPortNames()

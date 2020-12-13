@@ -113,12 +113,6 @@ namespace ModemAnalysis
 		private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
 		{
 			SerialPort sp = (SerialPort)sender;
-			ProcessReceivedEventArgs args = new ProcessReceivedEventArgs();
-
-
-			args.message = "Duomenys gauti";
-			OnProcessReceived(args);
-
 			try
 			{
 				int readBytes = sp.BytesToRead;
@@ -134,7 +128,6 @@ namespace ModemAnalysis
 					}
 				}
 				ProcessinamReceived();
-
 			}
 			catch
 			{
@@ -145,6 +138,7 @@ namespace ModemAnalysis
 
 		public void ProcessinamReceived()
 		{
+			ProcessReceivedEventArgs args = new ProcessReceivedEventArgs();
 			while (true)
 			{
 				int result = Queue_PopByte();
@@ -152,11 +146,10 @@ namespace ModemAnalysis
 				{
 					break;
 				}
-		
 				if (Convert.ToChar(result) == '\r')
 				{
-					//args.Message = new string(lineBuffer);
-					// reikia nusiusti string(lineBuffer) i MainWindow richTextBox_PrintAll
+					args.message = new string(lineBuffer);
+					OnProcessReceived(args);
 					lineBuffer[index] = Convert.ToChar(result);
 					lineBuffer[index + 1] = '\n';
 					index += 2;
