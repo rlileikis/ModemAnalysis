@@ -21,24 +21,24 @@
         <Button x:Name="btn_Connect" Content="Connect" Margin="340,10,0,0" VerticalAlignment="Top" Click="Button_Click_Connect" Height="20"/>
         <Button x:Name="btn_GoToTestMode" Content="Go to Test Mode" Grid.Column="1" HorizontalAlignment="Left" Margin="10,10,0,0" Grid.Row="1" VerticalAlignment="Top" Width="126" Height="20" Click="Button_Click_GoToTestMode"/>
         <Ellipse x:Name="stat_TestMode" Grid.Column="1" Fill="#FFF4F4F5" HorizontalAlignment="Right" Height="20" Margin="0,10,10,0" Grid.Row="1" Stroke="Black" VerticalAlignment="Top" Width="20" RenderTransformOrigin="0.473,0.983"/>
-        <RichTextBox x:Name="richTextBox_PrintAll" HorizontalAlignment="Left" Height="350" Margin="10,0,0,0" Grid.Row="1" VerticalAlignment="Top" Width="400" Grid.ColumnSpan="2" IsReadOnly="True" VerticalScrollBarVisibility="Visible" Block.LineHeight="1"/>
         <TextBox x:Name="txtBx_APN" HorizontalAlignment="Left" Height="20
                  " Margin="44,10,0,0" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" RenderTransformOrigin="0.983,1.174"/>
         <Label Content="APN:" HorizontalAlignment="Left" Margin="10,11,0,0" VerticalAlignment="Top" Height="20" Padding="0" Width="29" Grid.Row="2" RenderTransformOrigin="0.517,1.15"/>
-        <Label Content="DFOTA Url:" HorizontalAlignment="Left" Margin="10,42,0,0" VerticalAlignment="Top" Height="20" Padding="0" Width="60" Grid.Row="2" RenderTransformOrigin="0.517,1.15"/>
-        <TextBox HorizontalAlignment="Left" Height="20" Margin="75,42,0,0" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Top" Width="335"/>
+        <Label Content="DFOTA Url:" HorizontalAlignment="Left" Margin="10,49,0,0" VerticalAlignment="Top" Height="20" Padding="0" Width="60" Grid.Row="2" RenderTransformOrigin="0.517,1.15"/>
+        <TextBox HorizontalAlignment="Left" Height="20" Margin="75,49,0,0" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Top" Width="335"/>
         <Label Content="User:" HorizontalAlignment="Left" Margin="173,10,0,0" VerticalAlignment="Top" Height="20" Padding="0" Width="29" Grid.Row="2" RenderTransformOrigin="0.517,1.15"/>
         <TextBox x:Name="txtBx_User" HorizontalAlignment="Left" Height="20" Margin="207,10,0,0" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Top" Width="60" RenderTransformOrigin="0.067,1.25"/>
         <Label Content="Password:" HorizontalAlignment="Left" Margin="282,10,0,0" VerticalAlignment="Top" Height="20" Padding="0" Width="53" Grid.Row="2" RenderTransformOrigin="0.517,1.15"/>
         <TextBox x:Name="txtBx_Pass" HorizontalAlignment="Left" Height="20" Margin="340,10,0,0" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Top" Width="70"/>
         <Button x:Name="btn_CheckModemStatus" Content="Check Modem status" Grid.Column="1" HorizontalAlignment="Left" Margin="10,35,0,0" Grid.Row="1" VerticalAlignment="Top" Width="126" Height="20" Click="Button_CheckModemStatus"/>
-        <Label Content="Modem status:" HorizontalAlignment="Left" Margin="10,2,0,0" VerticalAlignment="Top" Height="20" Padding="0" Width="auto" Grid.Row="2" RenderTransformOrigin="0.517,1.15" Grid.Column="1" FontWeight="Bold"/>
-        <Label Content="Operator:" HorizontalAlignment="Left" Margin="10,22,0,0" VerticalAlignment="Top" Height="20" Padding="0" Width="auto
+        <Label Content="Modem status:" HorizontalAlignment="Left" Margin="10,3,0,0" VerticalAlignment="Top" Height="20" Padding="0" Width="auto" Grid.Row="2" RenderTransformOrigin="0.517,1.15" Grid.Column="1" FontWeight="Bold"/>
+        <Label Content="Operator:" HorizontalAlignment="Left" Margin="10,23,0,0" VerticalAlignment="Top" Height="20" Padding="0" Width="auto
                " Grid.Row="2" RenderTransformOrigin="0.517,1.15" Grid.Column="1" FontWeight="Bold"/>
-        <Label Content="Modem FW version:" HorizontalAlignment="Left" Margin="10,42,0,0" VerticalAlignment="Top" Height="20" Padding="0" Width="auto" Grid.Row="2" RenderTransformOrigin="0.517,1.15" Grid.Column="1" FontWeight="Bold"/>
-        <Label Content="Unknown" HorizontalAlignment="Left" Margin="99,2,0,0" VerticalAlignment="Top" Height="20" Padding="0" Width="83" Grid.Row="2" RenderTransformOrigin="0.517,1.15" Grid.Column="1"/>
-        <Label Content="Unknown" HorizontalAlignment="Left" Margin="70,22,0,0" VerticalAlignment="Top" Height="20" Padding="0" Width="112" Grid.Row="2" RenderTransformOrigin="0.517,1.15" Grid.Column="1"/>
-        <Label Content="Unknown" HorizontalAlignment="Left" Margin="10,59,0,0" VerticalAlignment="Top" Height="20" Padding="0" Width="172" Grid.Row="2" RenderTransformOrigin="0.517,1.15" Grid.Column="1"/>
+        <Label Content="Modem FW version:" HorizontalAlignment="Left" Margin="10,43,0,0" VerticalAlignment="Top" Height="20" Padding="0" Width="auto" Grid.Row="2" RenderTransformOrigin="0.517,1.15" Grid.Column="1" FontWeight="Bold"/>
+        <Label x:Name="lbl_Status" Content="Unknown" HorizontalAlignment="Left" Margin="99,3,0,0" VerticalAlignment="Top" Height="20" Padding="0" Width="83" Grid.Row="2" RenderTransformOrigin="0.517,1.15" Grid.Column="1"/>
+        <Label x:Name="lbl_Operator" Content="Unknown" HorizontalAlignment="Left" Margin="70,23,0,0" VerticalAlignment="Top" Height="20" Padding="0" Width="112" Grid.Row="2" RenderTransformOrigin="0.517,1.15" Grid.Column="1"/>
+        <Label x:Name="lbl_ModVer" Content="Unknown" HorizontalAlignment="Left" Margin="10,56,0,0" VerticalAlignment="Top" Height="20" Padding="0" Width="172" Grid.Row="2" RenderTransformOrigin="0.517,1.15" Grid.Column="1"/>
+        <TextBox x:Name="TextBox_PrintAll" HorizontalAlignment="Left" Height="350" Margin="10,0,0,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="400" VerticalScrollBarVisibility="Visible" TextChanged="TextBox_PrintAll_TextChanged"/>
 
 
     </Grid>

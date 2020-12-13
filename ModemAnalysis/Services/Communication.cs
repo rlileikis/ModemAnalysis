@@ -30,7 +30,7 @@ namespace ModemAnalysis
 		
 		public List<string> atInit = new List<string>()
 		{
-			"AT+QICSGP=1,1,\"\",\"\",\"\"",
+			//"AT+QICSGP=1,1,\"\",\"\",\"\"",
 
 			"AT+CPIN?",
 			"AT+COPS?",
@@ -132,7 +132,7 @@ namespace ModemAnalysis
 				foreach (var command in atInit)
 				{
 					WritePort(command);
-					Thread.Sleep(200); // negrazu
+					Thread.Sleep(100); // negrazu
 				}
 				return true;
 			}
@@ -160,9 +160,6 @@ namespace ModemAnalysis
 			}
 
 		}
-
-
-
 
 		public bool WritePort(string line)
 		{
@@ -202,11 +199,8 @@ namespace ModemAnalysis
 						break;
 					}
 					if (Convert.ToChar(result) == '\r')
-					{
-
-						args.message = new string(lineBuffer);
-						OnProcessReceived(args);
-						
+					{   
+						CompressAndSendToMainWindow(args);
 						lineBuffer[index] = Convert.ToChar(result);
 						lineBuffer[index + 1] = '\n';
 						index += 2;
@@ -228,6 +222,20 @@ namespace ModemAnalysis
 
 			}
 
+		}
+
+		private void CompressAndSendToMainWindow(ProcessReceivedEventArgs args)
+		{
+			char[] returnMessage = new char[index];
+			for (var i = 0; i < index; i++)
+				returnMessage[i] = lineBuffer[i];
+
+			var returnMessageString = new string(returnMessage);
+			if (!(returnMessageString == "" || returnMessageString == "OK"))
+			{
+				args.message = new string(returnMessage);
+				OnProcessReceived(args);
+			}
 		}
 
 		protected virtual void OnProcessReceived(ProcessReceivedEventArgs e)

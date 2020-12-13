@@ -2,8 +2,11 @@
 using ModemAnalysis.Services;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Management;
+using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Documents;
 using System.Windows.Media;
 using static ModemAnalysis.Communication;
 
@@ -35,17 +38,23 @@ namespace ModemAnalysis
 
         public void c_ProcessReceived(object sender, ProcessReceivedEventArgs e)
         {
-            this.Dispatcher.Invoke(() => { PrintDebug(e.message); });
+            this.Dispatcher.Invoke(() => 
+            {
+                PrintDebug(e.message);
+            });
         }
 
         public void PrintDebug(string str)
 		{
-			richTextBox_PrintAll.AppendText(str);
-			richTextBox_PrintAll.AppendText(Environment.NewLine);
-			richTextBox_PrintAll.ScrollToEnd();
+			//richTextBox_PrintAll.AppendText(str);
+			//richTextBox_PrintAll.AppendText(Environment.NewLine);
+			//richTextBox_PrintAll.ScrollToEnd();
+			TextBox_PrintAll.AppendText(str);
+			TextBox_PrintAll.AppendText(Environment.NewLine);
+			TextBox_PrintAll.ScrollToEnd();
 		}
 
-		private void Button_Click_Connect(object sender, RoutedEventArgs e)
+        private void Button_Click_Connect(object sender, RoutedEventArgs e)
 		{
 			//printDebug("Prisijungiam prie porto");
             if (isConnected == false) 
@@ -154,9 +163,28 @@ namespace ModemAnalysis
 			PrintDebug($">>> Port {trimmedComPortName} disconnected");
 		}
 
-       
+
+		private void TextBox_PrintAll_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+		{
+            string lastLine = TextBox_PrintAll.Text.Split('\n').LastOrDefault();
+
+            if (lastLine.Contains("ERROR")) lbl_Status.Content = "Error";
+            if (lastLine.Contains("READY")) lbl_Status.Content = "Ready";
+
+            if (lastLine.Contains("BG96"))
+            {
+                lbl_ModVer.Content = lastLine; //pagalvoti del kitu modemu
+            }
+
+            if (lastLine.Contains("COPS"))
+            {
+                var match = Regex.Match(lastLine, @"key : (?<+COPS: 0,0,>)").Groups[1].Value; //fix
+                 lbl_Operator.Content = lastLine;
+            }
 
 
+
+        }
     }
 
 
