@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ModemAnalysis.Services;
+using System;
 using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace ModemAnalysis
 {
 	public class Communication
 	{
-		private readonly SerialPort serialPort;
+		public readonly SerialPort serialPort;
 
 
 		public Communication()
@@ -32,7 +33,7 @@ namespace ModemAnalysis
 
 		public bool OpenPort(string portName)
 		{
-			try
+			try // Need to find better solution
 			{
 			serialPort.PortName = portName;
 			serialPort.BaudRate = 115200;
@@ -44,15 +45,14 @@ namespace ModemAnalysis
 
 			serialPort.DataReceived += new SerialDataReceivedEventHandler(DataReceivedHandler);
 
-				serialPort.Open();
-				return true;
+			serialPort.Open();
+			return true;
 			}
 			catch
 			{
 				return false;
 			}
 		}
-
 
 
 		public void ClosePort()
@@ -73,22 +73,7 @@ namespace ModemAnalysis
 			ResetQueue();
 		}
 
-		public bool GotoTestMode(string port)
-		{
-			if (serialPort.IsOpen == true)
-			{
-				WritePort("SET,SYSTEM,TEST_MODE,3;"); //Access Test Mode in the device
-				while(!OpenPort(port))
-				{
-					//Device restarts itself, so we are waiting for it to be connected again.
-				}
-				return true;
-			}
-			else
-			{
-				return false;
-			}
-		}
+
 
 		public bool WritePort(string line)
 		{
@@ -103,7 +88,7 @@ namespace ModemAnalysis
 			}
 		}
 
-		private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
+		public void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
 		{
 			SerialPort sp = (SerialPort)sender;
 
@@ -139,11 +124,12 @@ namespace ModemAnalysis
 				{
 					break;
 				}
-
 		
 				if (Convert.ToChar(result) == '\r')
 				{
-					MessageBox.Show(new string(lineBuffer));
+
+					// reikia nusiusti string(lineBuffer) i MainWindow richTextBox_PrintAll
+
 					lineBuffer[index] = Convert.ToChar(result);
 					lineBuffer[index + 1] = '\n';
 					index += 2;
@@ -161,6 +147,9 @@ namespace ModemAnalysis
 			}
 
 		}
+
+
+
 
 		public void ResetBuffer()
 		{

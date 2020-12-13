@@ -1,6 +1,8 @@
 ﻿using ModemAnalysis.Models;
+using ModemAnalysis.Services;
 using System;
 using System.Collections.Generic;
+using System.IO.Ports;
 using System.Linq;
 using System.Management;
 using System.Text;
@@ -26,15 +28,18 @@ namespace ModemAnalysis
         private List<ApnSetting> ApnSettings { get; set; }
 
 		readonly Communication Comm = new Communication();
+        readonly TestSteps TestSteps = new TestSteps();
 
         private bool isConnected = false;
 
         string trimmedComPortName = "";
+
         public MainWindow()
 		{
             InitializeComponent();
             //Loaded += MyWindow_Loaded;
             InitPortNames();
+
         }
 
 		public void PrintDebug(string str)
@@ -65,7 +70,7 @@ namespace ModemAnalysis
 		private void Button_Click_Start(object sender, RoutedEventArgs e)
 		{
 			PrintDebug("Startuojam testa");
-            if(Comm.GotoTestMode(trimmedComPortName))
+            if(TestSteps.GotoTestMode(trimmedComPortName))
 			{
                 PrintDebug("Perejom i test mode");
                 
@@ -74,12 +79,13 @@ namespace ModemAnalysis
 			{
                 PrintDebug("Device is disconnected, trying to reconnect.");
                 OpenPort();
+                PrintDebug("Start test again");
             }
                 
 
         }
 
-        private void Button_Test_Click(object sender, RoutedEventArgs e)
+        private void Button_Test_ModemInit(object sender, RoutedEventArgs e)
         {
             Comm.WritePort("AT");
         }
@@ -114,8 +120,6 @@ namespace ModemAnalysis
 
             if (comboBox_PortSelection.SelectedIndex > -1)
             {
-                //var trimmedComPortName = comboBox_PortSelection.Text.Split(' ')[0];
-
                 if (Comm.OpenPort(trimmedComPortName))
                 {
                     btn_Connect.Content = "Disconnect";
@@ -129,8 +133,7 @@ namespace ModemAnalysis
                 }
             }
             else MessageBox.Show("Choose port");
-
-
+            
         }
 
         void ClosePort()
@@ -143,8 +146,10 @@ namespace ModemAnalysis
 			PrintDebug($">>> Port {trimmedComPortName} disconnected");
 		}
 
+       
 
-	}
+
+    }
 
 
 
