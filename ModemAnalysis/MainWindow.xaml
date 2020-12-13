@@ -28,9 +28,9 @@
         <Label Content="DFOTA Url:" HorizontalAlignment="Left" Margin="10,42,0,0" VerticalAlignment="Top" Height="20" Padding="0" Width="60" Grid.Row="2" RenderTransformOrigin="0.517,1.15"/>
         <TextBox HorizontalAlignment="Left" Height="20" Margin="75,42,0,0" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Top" Width="335"/>
         <Label Content="User:" HorizontalAlignment="Left" Margin="173,10,0,0" VerticalAlignment="Top" Height="20" Padding="0" Width="29" Grid.Row="2" RenderTransformOrigin="0.517,1.15"/>
-        <TextBox HorizontalAlignment="Left" Height="20" Margin="207,10,0,0" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Top" Width="60" RenderTransformOrigin="0.067,1.25"/>
+        <TextBox x:Name="txtBx_User" HorizontalAlignment="Left" Height="20" Margin="207,10,0,0" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Top" Width="60" RenderTransformOrigin="0.067,1.25"/>
         <Label Content="Password:" HorizontalAlignment="Left" Margin="282,10,0,0" VerticalAlignment="Top" Height="20" Padding="0" Width="53" Grid.Row="2" RenderTransformOrigin="0.517,1.15"/>
-        <TextBox HorizontalAlignment="Left" Height="20" Margin="340,10,0,0" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Top" Width="70"/>
+        <TextBox x:Name="txtBx_Pass" HorizontalAlignment="Left" Height="20" Margin="340,10,0,0" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Top" Width="70"/>
         <Button x:Name="btn_ModemInit" Content="Modem Init" Grid.Column="1" HorizontalAlignment="Left" Margin="10,35,0,0" Grid.Row="1" VerticalAlignment="Top" Width="75" Height="20" Click="Button_Test_ModemInit"/>
 
 

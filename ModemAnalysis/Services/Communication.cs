@@ -13,6 +13,12 @@ namespace ModemAnalysis
 	{
 		public readonly SerialPort serialPort;
 
+		public event EventHandler<ProcessReceivedEventArgs> ProcessReceived;
+
+		public class ProcessReceivedEventArgs : EventArgs
+		{
+			public string message { get; set; }
+		}
 
 		public Communication()
 		{
@@ -73,6 +79,22 @@ namespace ModemAnalysis
 			ResetQueue();
 		}
 
+		public bool GotoTestMode(string port)
+		{
+			if (serialPort.IsOpen == true)
+			{
+				WritePort("SET,SYSTEM,TEST_MODE,3;"); //Access Test Mode in the device
+				while (!OpenPort(port))
+				{
+					//Device restarts itself, so we are waiting for it to be connected again.
+				}
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
 
 
 		public bool WritePort(string line)
@@ -88,9 +110,14 @@ namespace ModemAnalysis
 			}
 		}
 
-		public void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
+		private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
 		{
 			SerialPort sp = (SerialPort)sender;
+			ProcessReceivedEventArgs args = new ProcessReceivedEventArgs();
+
+
+			args.message = "Duomenys gauti";
+			OnProcessReceived(args);
 
 			try
 			{
@@ -106,7 +133,8 @@ namespace ModemAnalysis
 						break;
 					}
 				}
-				ProcessReceived();
+				ProcessinamReceived();
+
 			}
 			catch
 			{
@@ -115,7 +143,7 @@ namespace ModemAnalysis
 		}
 
 
-		public void ProcessReceived()
+		public void ProcessinamReceived()
 		{
 			while (true)
 			{
@@ -127,9 +155,8 @@ namespace ModemAnalysis
 		
 				if (Convert.ToChar(result) == '\r')
 				{
-
+					//args.Message = new string(lineBuffer);
 					// reikia nusiusti string(lineBuffer) i MainWindow richTextBox_PrintAll
-
 					lineBuffer[index] = Convert.ToChar(result);
 					lineBuffer[index + 1] = '\n';
 					index += 2;
@@ -147,7 +174,14 @@ namespace ModemAnalysis
 			}
 
 		}
-
+		protected virtual void OnProcessReceived(ProcessReceivedEventArgs e)
+		{
+			EventHandler<ProcessReceivedEventArgs> handler = ProcessReceived;
+			if (handler != null)
+			{
+				handler(this, e);
+			}
+		}
 
 
 

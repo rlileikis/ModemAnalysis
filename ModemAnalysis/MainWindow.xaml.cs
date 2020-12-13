@@ -2,21 +2,9 @@
 using ModemAnalysis.Services;
 using System;
 using System.Collections.Generic;
-using System.IO.Ports;
-using System.Linq;
 using System.Management;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using static ModemAnalysis.Communication;
 
 namespace ModemAnalysis
 {
@@ -29,7 +17,7 @@ namespace ModemAnalysis
 
 		readonly Communication Comm = new Communication();
         readonly TestSteps TestSteps = new TestSteps();
-
+   
         private bool isConnected = false;
 
         string trimmedComPortName = "";
@@ -40,9 +28,16 @@ namespace ModemAnalysis
             //Loaded += MyWindow_Loaded;
             InitPortNames();
 
+            Comm.ProcessReceived += c_ProcessReceived;
+
         }
 
-		public void PrintDebug(string str)
+        public void c_ProcessReceived(object sender, ProcessReceivedEventArgs e)
+        {
+            PrintDebug(e.message);
+        }
+
+        public void PrintDebug(string str)
 		{
 			richTextBox_PrintAll.AppendText(str);
 			richTextBox_PrintAll.AppendText(Environment.NewLine);
@@ -70,7 +65,7 @@ namespace ModemAnalysis
 		private void Button_Click_Start(object sender, RoutedEventArgs e)
 		{
 			PrintDebug("Startuojam testa");
-            if(TestSteps.GotoTestMode(trimmedComPortName))
+            if(Comm.GotoTestMode(trimmedComPortName)) // pakeist comm
 			{
                 PrintDebug("Perejom i test mode");
                 
