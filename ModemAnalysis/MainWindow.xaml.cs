@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Management;
 using System.Windows;
+using System.Windows.Media;
 using static ModemAnalysis.Communication;
 
 namespace ModemAnalysis
@@ -65,13 +66,13 @@ namespace ModemAnalysis
 		private void Button_Click_GoToTestMode(object sender, RoutedEventArgs e)
 		{
 			PrintDebug("Startuojam testa");
-            if(TestSteps.GotoTestMode(trimmedComPortName)) // pakeist comm
-			{
+            if (Comm.GotoTestMode(trimmedComPortName)) // pakeist comm
+            {
                 PrintDebug("Perejom i test mode");
                 
             }
             else
-			{
+            {
                 PrintDebug("Device is disconnected, trying to reconnect.");
                 OpenPort();
                 PrintDebug("Start test again");
@@ -132,6 +133,7 @@ namespace ModemAnalysis
                     comboBox_PortSelection.IsEnabled = false;
                     isConnected = true;
                     PrintDebug($">>> Connected to port {trimmedComPortName}");
+                    stat_TestMode.Fill = Brushes.Green;
                 }
                 else
                 {
