@@ -16,7 +16,7 @@ namespace ModemAnalysis
         private List<ApnSetting> ApnSettings { get; set; }
 
 		readonly Communication Comm = new Communication();
-        readonly TestSteps TestSteps = new TestSteps();
+        readonly TestStep TestSteps = new TestStep();
    
         private bool isConnected = false;
 
@@ -65,7 +65,7 @@ namespace ModemAnalysis
 		private void Button_Click_Start(object sender, RoutedEventArgs e)
 		{
 			PrintDebug("Startuojam testa");
-            if(Comm.GotoTestMode(trimmedComPortName)) // pakeist comm
+            if(TestSteps.GotoTestMode(trimmedComPortName)) // pakeist comm
 			{
                 PrintDebug("Perejom i test mode");
                 
@@ -82,7 +82,8 @@ namespace ModemAnalysis
 
         private void Button_Test_ModemInit(object sender, RoutedEventArgs e)
         {
-            Comm.WritePort("ATI");
+            //Comm.WritePort("ATI");
+            TestSteps.SendAT();
         }
 
         private void InitPortNames()

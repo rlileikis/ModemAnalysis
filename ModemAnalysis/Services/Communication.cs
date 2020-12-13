@@ -96,12 +96,36 @@ namespace ModemAnalysis
 			}
 		}
 
+		public bool SendAT()
+		{
+			if (serialPort.IsOpen == true)
+			{
+				WritePort("ATI");
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+
+		}
+
+
+		public bool InitializeModem(string apn, string user, string pass)
+		{
+
+
+			return false;
+		}
+
+
+
 
 		public bool WritePort(string line)
 		{
 			if (serialPort.IsOpen == true)
 			{
-				serialPort.Write($"{line}\r\n");
+				serialPort.Write($"{line}\r\n"); //Sends command to the device
 				return true;
 			}
 			else
@@ -123,7 +147,6 @@ namespace ModemAnalysis
 				{
 					if (Queue_AddByte(readBuffer[i]) == (-1))
 					{
-						Console.WriteLine("Buffer Full");
 						break;
 					}
 				}
