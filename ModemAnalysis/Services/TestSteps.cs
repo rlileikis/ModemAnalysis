@@ -25,6 +25,13 @@ namespace ModemAnalysis.Services
 			}
 		}
 
+		public bool InitializeModem(string apn, string user, string pass)
+		{
+
+
+			return false;
+		}
+
 
 	}
 }
