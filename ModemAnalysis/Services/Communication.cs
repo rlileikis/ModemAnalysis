@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -12,6 +13,8 @@ namespace ModemAnalysis
 	public class Communication
 	{
 		public readonly SerialPort serialPort;
+
+		Semaphore _sync = new Semaphore(1, 1);
 
 		public event EventHandler<ProcessReceivedEventArgs> ProcessReceived;
 
@@ -24,6 +27,17 @@ namespace ModemAnalysis
 		{
 			serialPort = new SerialPort();
 		}
+		
+		public List<string> atInit = new List<string>()
+		{
+			"AT+QICSGP=1,1,\"\",\"\",\"\"",
+
+			"AT+CPIN?",
+			"AT+COPS?",
+			"AT+CREG?",
+			"AT+QGMR"
+		};
+
 
 		public string PortName
 		{
@@ -111,20 +125,38 @@ namespace ModemAnalysis
 		}
 
 
-		public string InitializeModem(string apn, string user, string pass)
+		public bool CheckModemStatus()
 		{
 			if (serialPort.IsOpen == true)
-			{
-				WritePort("AT+CPIN?");
-				//WritePort("AT+COPS?");
-				//WritePort("AT+CREG?");
-				//MessageBox.Show(new string(lineBuffer));
-
-				return "";
+			{				
+				foreach (var command in atInit)
+				{
+					WritePort(command);
+					Thread.Sleep(200); // negrazu
+				}
+				return true;
 			}
 			else
 			{
-				return "";
+				return false;
+			}
+
+		}
+
+		public bool ModemInit(string apn, string user, string pass)
+		{
+			if (serialPort.IsOpen == true)
+			{
+				foreach (var command in atInit)
+				{
+					WritePort(command);
+					Thread.Sleep(200); // negrazu
+					
+				}return true;
+			}
+			else
+			{
+				return false;
 			}
 
 		}
@@ -171,8 +203,10 @@ namespace ModemAnalysis
 					}
 					if (Convert.ToChar(result) == '\r')
 					{
+
 						args.message = new string(lineBuffer);
 						OnProcessReceived(args);
+						
 						lineBuffer[index] = Convert.ToChar(result);
 						lineBuffer[index + 1] = '\n';
 						index += 2;
@@ -193,6 +227,7 @@ namespace ModemAnalysis
 			{
 
 			}
+
 		}
 
 		protected virtual void OnProcessReceived(ProcessReceivedEventArgs e)

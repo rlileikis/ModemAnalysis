@@ -62,7 +62,7 @@ namespace ModemAnalysis
 			PrintDebug("Uzkurem programa");
 		}
 
-		private void Button_Click_Start(object sender, RoutedEventArgs e)
+		private void Button_Click_GoToTestMode(object sender, RoutedEventArgs e)
 		{
 			PrintDebug("Startuojam testa");
             if(TestSteps.GotoTestMode(trimmedComPortName)) // pakeist comm
@@ -80,11 +80,19 @@ namespace ModemAnalysis
 
         }
 
-        private void Button_Test_ModemInit(object sender, RoutedEventArgs e)
+        private void Button_CheckModemStatus(object sender, RoutedEventArgs e)
         {
             //Comm.WritePort("ATI");
-            var response = Comm.InitializeModem(txtBx_APN.Text, txtBx_Pass.Text, txtBx_User.Text);
-            PrintDebug(response);
+            var response = Comm.CheckModemStatus();
+            //PrintDebug(response);
+            //TestSteps.SendAT();
+        }
+
+        private void Button_ModemInit(object sender, RoutedEventArgs e)
+        {
+            //Comm.WritePort("ATI");
+            var response = Comm.ModemInit(txtBx_APN.Text, txtBx_Pass.Text, txtBx_User.Text);
+            //PrintDebug(response);
             //TestSteps.SendAT();
         }
 
