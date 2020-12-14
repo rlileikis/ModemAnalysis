@@ -24,7 +24,7 @@ namespace ModemAnalysis
    
         private bool isConnected = false;
 
-        string trimmedComPortName = "";
+        
 
         public MainWindow()
 		{
@@ -75,7 +75,7 @@ namespace ModemAnalysis
 		private void Button_Click_GoToTestMode(object sender, RoutedEventArgs e)
 		{
 			PrintDebug("Startuojam testa");
-            if (Comm.GotoTestMode(trimmedComPortName)) // pakeist comm
+            if (Comm.GotoTestMode(GetPortFromComboList())) // pakeist comm
             {
                 PrintDebug("Perejom i test mode");
                 
@@ -87,13 +87,12 @@ namespace ModemAnalysis
                 PrintDebug("Start test again");
             }
                 
-
         }
 
         private void Button_CheckModemStatus(object sender, RoutedEventArgs e)
         {
             //Comm.WritePort("ATI");
-            var response = Comm.CheckModemStatus();
+            var response = Comm.ModemInit(txtBx_APN.Text, txtBx_Pass.Text, txtBx_User.Text);
             //PrintDebug(response);
             //TestSteps.SendAT();
         }
@@ -108,6 +107,7 @@ namespace ModemAnalysis
 
         private void InitPortNames()
         {
+            string trimmedComPortName = "";
             comboBox_PortSelection.Items.Clear();
             try
             {
@@ -119,7 +119,11 @@ namespace ModemAnalysis
                     {
                         if (queryObj["Caption"].ToString().Contains("(COM")) //Finds all devices with caption "COM"
                         {
-                            trimmedComPortName = queryObj["Caption"].ToString().Split('(', ')')[1];
+                            //trimmedComPortName = queryObj["Caption"].ToString().Split('(', ')')[1];
+                            string comPortName = Regex.Match(queryObj["Caption"].ToString(), @"\(COM([^)]*)\)").Groups[1].Value;
+                           // comPortName = "2";
+                            trimmedComPortName = "COM" + comPortName;  // add trimmed COM back
+
                             comboBox_PortSelection.Items.Add(trimmedComPortName + " - " + queryObj["Description"]);
                          }
                     }
@@ -135,32 +139,36 @@ namespace ModemAnalysis
         {
 
             if (comboBox_PortSelection.SelectedIndex > -1)
-            {
-                if (Comm.OpenPort(trimmedComPortName))
-                {
-                    btn_Connect.Content = "Disconnect";
-                    comboBox_PortSelection.IsEnabled = false;
-                    isConnected = true;
-                    PrintDebug($">>> Connected to port {trimmedComPortName}");
-                    stat_TestMode.Fill = Brushes.Green;
-                }
-                else
-                {
-                    PrintDebug($">>> Can't connect to port {trimmedComPortName}");
-                }
-            }
-            else MessageBox.Show("Choose port");
+			{
+				if (Comm.OpenPort(GetPortFromComboList()))
+				{
+					btn_Connect.Content = "Disconnect";
+					comboBox_PortSelection.IsEnabled = false;
+					isConnected = true;
+					PrintDebug($">>> Connected to port {GetPortFromComboList()}");
+					stat_TestMode.Fill = Brushes.Green;
+				}
+				else
+				{
+					PrintDebug($">>> Can't connect to port {GetPortFromComboList()}");
+				}
+			}
+			else MessageBox.Show("Choose port");
             
         }
 
-        void ClosePort()
+		private string GetPortFromComboList()
+		{
+			return comboBox_PortSelection.SelectedItem.ToString().Substring(0, comboBox_PortSelection.SelectedItem.ToString().IndexOf(" "));
+		}
+
+		void ClosePort()
         {
-            var trimmedComPortName = comboBox_PortSelection.Text.Split(' ')[0];
             Comm.ClosePort();
 			isConnected = false;
             btn_Connect.Content = "Connect";
             comboBox_PortSelection.IsEnabled = true;
-			PrintDebug($">>> Port {trimmedComPortName} disconnected");
+			PrintDebug($">>> Port {GetPortFromComboList()} disconnected");
 		}
 
 
@@ -178,11 +186,27 @@ namespace ModemAnalysis
 
             if (lastLine.Contains("COPS"))
             {
-                var match = Regex.Match(lastLine, @"key : (?<+COPS: 0,0,>)").Groups[1].Value; //fix
-                 lbl_Operator.Content = lastLine;
+                //var match = Regex.Match(lastLine, @"key : (?<+COPS: 0,0,>)").Groups[1].Value; //fix
+                lbl_Operator.Content = lastLine;
             }
 
+        }
 
+		private void Button_GoToUpdateModemFw(object sender, RoutedEventArgs e)
+		{
+            //AT+QFOTADL="https://ruptelafwsa.blob.core.windows.net/fwsa/BG96FW/BG96MAR02A07M1G_01.018.01.018-BG96MAR02A07M1G_01.016.01.016.bin"
+            //https://ruptelafwsa.blob.core.windows.net/fwsa/BG96FW/BG96MAR02A07M1G_01.016.01.016-BG96MAR02A07M1G_01.018.01.018.bin
+            if (Comm.GotoModemUpdate(GetPortFromComboList(), txtBx_DfotaUrl.Text))
+            {
+                PrintDebug("DFOTA update initiated");
+
+            }
+            else
+            {
+                PrintDebug("Device is disconnected, trying to reconnect.");
+                OpenPort();
+                PrintDebug("Start test again");
+            }
 
         }
     }

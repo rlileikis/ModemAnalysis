@@ -30,8 +30,8 @@ namespace ModemAnalysis
 		
 		public List<string> atInit = new List<string>()
 		{
-			//"AT+QICSGP=1,1,\"\",\"\",\"\"",
-
+			"AT+QCFGEXT=\"fota_apn\"",
+			"AT+COPS=0",
 			"AT+CPIN?",
 			"AT+COPS?",
 			"AT+CREG?",
@@ -55,18 +55,18 @@ namespace ModemAnalysis
 		{
 			try // Need to find better solution
 			{
-			serialPort.PortName = portName;
-			serialPort.BaudRate = 115200;
-			serialPort.Handshake = Handshake.None;
-			serialPort.ReadTimeout = 500;
-			serialPort.DataBits = 8;
-			serialPort.Parity = Parity.None;
-			serialPort.StopBits = StopBits.One;
+				serialPort.PortName = portName;
+				serialPort.BaudRate = 115200;
+				serialPort.Handshake = Handshake.None;
+				serialPort.ReadTimeout = 500;
+				serialPort.DataBits = 8;
+				serialPort.Parity = Parity.None;
+				serialPort.StopBits = StopBits.One;
 
-			serialPort.DataReceived += new SerialDataReceivedEventHandler(DataReceivedHandler);
+				serialPort.DataReceived += new SerialDataReceivedEventHandler(DataReceivedHandler);
 
-			serialPort.Open();
-			return true;
+				serialPort.Open();
+				return true;
 			}
 			catch
 			{
@@ -102,6 +102,20 @@ namespace ModemAnalysis
 				{
 					//Device restarts itself, so we are waiting for it to be connected again.
 				}
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+
+		public bool GotoModemUpdate(string port, string dfotaUrl)
+		{
+			if (serialPort.IsOpen == true)
+			{
+				//CheckModemStatus();
+				WritePort($"AT+QFOTADL=\"{dfotaUrl}\"");
 				return true;
 			}
 			else
@@ -147,6 +161,8 @@ namespace ModemAnalysis
 		{
 			if (serialPort.IsOpen == true)
 			{
+				WritePort($"AT+QCFGEXT=\"fota_apn\",0,\"{apn}\",\"{user}\",\"{pass}\"");
+				Thread.Sleep(200);
 				foreach (var command in atInit)
 				{
 					WritePort(command);

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ModemAnalysis"
         mc:Ignorable="d"
-        Title="MainWindow" Height="500" Width="600" MinHeight="500" MinWidth="600" MaxHeight="500" MaxWidth="600" Loaded="MyWindow_Loaded">
+        Title="ModemAnalyser v0.1 DEMO" Height="500" Width="600" MinHeight="500" MinWidth="600" MaxHeight="500" MaxWidth="600" Loaded="MyWindow_Loaded">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="410"></ColumnDefinition>
@@ -25,7 +25,7 @@
                  " Margin="44,10,0,0" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" RenderTransformOrigin="0.983,1.174"/>
         <Label Content="APN:" HorizontalAlignment="Left" Margin="10,11,0,0" VerticalAlignment="Top" Height="20" Padding="0" Width="29" Grid.Row="2" RenderTransformOrigin="0.517,1.15"/>
         <Label Content="DFOTA Url:" HorizontalAlignment="Left" Margin="10,49,0,0" VerticalAlignment="Top" Height="20" Padding="0" Width="60" Grid.Row="2" RenderTransformOrigin="0.517,1.15"/>
-        <TextBox HorizontalAlignment="Left" Height="20" Margin="75,49,0,0" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Top" Width="335"/>
+        <TextBox x:Name="txtBx_DfotaUrl" HorizontalAlignment="Left" Height="20" Margin="75,49,0,0" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Top" Width="335" Text="https://ruptelafwsa.blob.core.windows.net/fwsa/BG96FW/BG96MAR02A07M1G_01.016.01.016-BG96MAR02A07M1G_01.018.01.018.bin"/>
         <Label Content="User:" HorizontalAlignment="Left" Margin="173,10,0,0" VerticalAlignment="Top" Height="20" Padding="0" Width="29" Grid.Row="2" RenderTransformOrigin="0.517,1.15"/>
         <TextBox x:Name="txtBx_User" HorizontalAlignment="Left" Height="20" Margin="207,10,0,0" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Top" Width="60" RenderTransformOrigin="0.067,1.25"/>
         <Label Content="Password:" HorizontalAlignment="Left" Margin="282,10,0,0" VerticalAlignment="Top" Height="20" Padding="0" Width="53" Grid.Row="2" RenderTransformOrigin="0.517,1.15"/>
@@ -39,6 +39,7 @@
         <Label x:Name="lbl_Operator" Content="Unknown" HorizontalAlignment="Left" Margin="70,23,0,0" VerticalAlignment="Top" Height="20" Padding="0" Width="112" Grid.Row="2" RenderTransformOrigin="0.517,1.15" Grid.Column="1"/>
         <Label x:Name="lbl_ModVer" Content="Unknown" HorizontalAlignment="Left" Margin="10,56,0,0" VerticalAlignment="Top" Height="20" Padding="0" Width="172" Grid.Row="2" RenderTransformOrigin="0.517,1.15" Grid.Column="1"/>
         <TextBox x:Name="TextBox_PrintAll" HorizontalAlignment="Left" Height="350" Margin="10,0,0,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="400" VerticalScrollBarVisibility="Visible" TextChanged="TextBox_PrintAll_TextChanged"/>
+        <Button x:Name="btn_ModemFwUpdate" Content="Update Modem FW" Grid.Column="1" HorizontalAlignment="Left" Margin="10,60,0,0" Grid.Row="1" VerticalAlignment="Top" Width="126" Height="20" Click="Button_GoToUpdateModemFw"/>
 
 
     </Grid>
