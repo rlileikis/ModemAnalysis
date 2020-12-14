@@ -121,7 +121,7 @@ namespace ModemAnalysis
 			{
 				//CheckModemStatus();
 				WritePort($"AT+QFOTADL=\"{DfotaIndexToUrl(dfotaUrlIndex)}\"");
-				MessageBox.Show(DfotaIndexToUrl(dfotaUrlIndex));
+				//MessageBox.Show(DfotaIndexToUrl(dfotaUrlIndex));
 				return true;
 			}
 			else
