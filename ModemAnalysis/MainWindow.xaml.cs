@@ -31,7 +31,7 @@ namespace ModemAnalysis
             InitializeComponent();
             //Loaded += MyWindow_Loaded;
             InitPortNames();
-
+            InitDfotaUrls();
             Comm.ProcessReceived += c_ProcessReceived;
 
         }
@@ -69,38 +69,58 @@ namespace ModemAnalysis
 
 		private void MyWindow_Loaded(object sender, RoutedEventArgs e)
 		{
-			PrintDebug("Uzkurem programa");
+			PrintDebug("Modem DFOTA update tool is started");
 		}
 
 		private void Button_Click_GoToTestMode(object sender, RoutedEventArgs e)
 		{
-			PrintDebug("Startuojam testa");
-            if (Comm.GotoTestMode(GetPortFromComboList())) // pakeist comm
-            {
-                PrintDebug("Perejom i test mode");
-                
-            }
-            else
-            {
-                PrintDebug("Device is disconnected, trying to reconnect.");
-                OpenPort();
-                PrintDebug("Start test again");
-            }
-                
+            if (txtBx_APN.Text=="")
+			{
+                if (MessageBox.Show("Do you want to use blank APN?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
+                {
+                    //do no stuff
+                    //do nothing
+                }
+                else
+				{// do yes stuff
+					GoToTestMode();
+				}
+
+			}
+            else GoToTestMode();
+
+
+
+
         }
 
-        private void Button_CheckModemStatus(object sender, RoutedEventArgs e)
+		private void GoToTestMode()
+		{
+			if (Comm.GotoTestMode(GetPortFromComboList())) // pakeist comm
+			{
+				PrintDebug("Test Mode success");
+
+			}
+			else
+			{
+				PrintDebug("Device is disconnected, trying to reconnect.");
+				OpenPort();
+				PrintDebug("Start test again");
+			}
+		}
+
+		private void Button_CheckModemStatus(object sender, RoutedEventArgs e)
         {
             //Comm.WritePort("ATI");
-            var response = Comm.ModemInit(txtBx_APN.Text, txtBx_Pass.Text, txtBx_User.Text);
+            var response = Comm.CheckModemStatus();
             //PrintDebug(response);
             //TestSteps.SendAT();
         }
 
-        private void Button_ModemInit(object sender, RoutedEventArgs e)
+        private void btn_ModemInit_Click(object sender, RoutedEventArgs e)
         {
             //Comm.WritePort("ATI");
-            var response = Comm.ModemInit(txtBx_APN.Text, txtBx_Pass.Text, txtBx_User.Text);
+            var response = Comm.ModemInit(txtBx_APN.Text, txtBx_User.Text, txtBx_Pass.Text);
             //PrintDebug(response);
             //TestSteps.SendAT();
         }
@@ -119,9 +139,7 @@ namespace ModemAnalysis
                     {
                         if (queryObj["Caption"].ToString().Contains("(COM")) //Finds all devices with caption "COM"
                         {
-                            //trimmedComPortName = queryObj["Caption"].ToString().Split('(', ')')[1];
                             string comPortName = Regex.Match(queryObj["Caption"].ToString(), @"\(COM([^)]*)\)").Groups[1].Value;
-                           // comPortName = "2";
                             trimmedComPortName = "COM" + comPortName;  // add trimmed COM back
 
                             comboBox_PortSelection.Items.Add(trimmedComPortName + " - " + queryObj["Description"]);
@@ -135,6 +153,19 @@ namespace ModemAnalysis
             }
 
         }
+
+
+        private void InitDfotaUrls()
+		{
+            //https://ruptelafwsa.blob.core.windows.net/fwsa/BG96FW/BG96MAR02A07M1G_01.018.01.018-BG96MAR02A07M1G_01.016.01.016.bin
+            //https://ruptelafwsa.blob.core.windows.net/fwsa/BG96FW/BG96MAR02A07M1G_01.016.01.016-BG96MAR02A07M1G_01.018.01.018.bin
+            comboBox_DfotaSelection.Items.Add("BG96MAR02A07M1G_01.016.01.016 -> BG96MAR02A07M1G_01.018.01.018.bin"); // ID: 0
+            comboBox_DfotaSelection.Items.Add("BG96MAR02A07M1G_01.018.01.018 -> BG96MAR02A07M1G_01.016.01.016.bin"); // ID: 1
+            
+        }
+
+
+
         public void OpenPort()
         {
 
@@ -190,13 +221,19 @@ namespace ModemAnalysis
                 lbl_Operator.Content = lastLine;
             }
 
+            if (lastLine.Contains("APP"))
+            {
+                Comm.ModemInit(txtBx_APN.Text, txtBx_User.Text, txtBx_Pass.Text);
+                //lbl_Operator.Content = lastLine;
+            }
+
         }
 
 		private void Button_GoToUpdateModemFw(object sender, RoutedEventArgs e)
 		{
-            //AT+QFOTADL="https://ruptelafwsa.blob.core.windows.net/fwsa/BG96FW/BG96MAR02A07M1G_01.018.01.018-BG96MAR02A07M1G_01.016.01.016.bin"
-            //https://ruptelafwsa.blob.core.windows.net/fwsa/BG96FW/BG96MAR02A07M1G_01.016.01.016-BG96MAR02A07M1G_01.018.01.018.bin
-            if (Comm.GotoModemUpdate(GetPortFromComboList(), txtBx_DfotaUrl.Text))
+
+
+            if (Comm.StartDfota(GetPortFromComboList(), comboBox_DfotaSelection.SelectedIndex))
             {
                 PrintDebug("DFOTA update initiated");
 
@@ -209,7 +246,13 @@ namespace ModemAnalysis
             }
 
         }
-    }
+
+		private void comboBox_PortSelection_DropDownOpened(object sender, EventArgs e)
+		{
+            InitPortNames();
+        }
+
+	}
 
 
 

@@ -28,10 +28,15 @@ namespace ModemAnalysis
 			serialPort = new SerialPort();
 		}
 		
-		public List<string> atInit = new List<string>()
+		public List<string> modInitList = new List<string>()
+		{
+			"AT+COPS=0",
+			"AT+QGMR"
+		};
+
+		public List<string> modStatusList = new List<string>()
 		{
 			"AT+QCFGEXT=\"fota_apn\"",
-			"AT+COPS=0",
 			"AT+CPIN?",
 			"AT+COPS?",
 			"AT+CREG?",
@@ -110,17 +115,34 @@ namespace ModemAnalysis
 			}
 		}
 
-		public bool GotoModemUpdate(string port, string dfotaUrl)
+		public bool StartDfota(string port, int dfotaUrlIndex)
 		{
 			if (serialPort.IsOpen == true)
 			{
 				//CheckModemStatus();
-				WritePort($"AT+QFOTADL=\"{dfotaUrl}\"");
+				WritePort($"AT+QFOTADL=\"{DfotaIndexToUrl(dfotaUrlIndex)}\"");
+				MessageBox.Show(DfotaIndexToUrl(dfotaUrlIndex));
 				return true;
 			}
 			else
 			{
 				return false;
+			}
+		}
+
+		private string DfotaIndexToUrl(int index)
+		{
+			switch (index)
+			{
+				case 0:
+					return "https://ruptelafwsa.blob.core.windows.net/fwsa/BG96FW/BG96MAR02A07M1G_01.016.01.016-BG96MAR02A07M1G_01.018.01.018.bin";
+
+				case 1:
+					return "https://ruptelafwsa.blob.core.windows.net/fwsa/BG96FW/BG96MAR02A07M1G_01.018.01.018-BG96MAR02A07M1G_01.016.01.016.bin";
+
+				default:
+					return "";
+	
 			}
 		}
 
@@ -143,7 +165,7 @@ namespace ModemAnalysis
 		{
 			if (serialPort.IsOpen == true)
 			{				
-				foreach (var command in atInit)
+				foreach (var command in modStatusList)
 				{
 					WritePort(command);
 					Thread.Sleep(100); // negrazu
@@ -161,12 +183,13 @@ namespace ModemAnalysis
 		{
 			if (serialPort.IsOpen == true)
 			{
-				WritePort($"AT+QCFGEXT=\"fota_apn\",0,\"{apn}\",\"{user}\",\"{pass}\"");
 				Thread.Sleep(200);
-				foreach (var command in atInit)
+				WritePort($"AT+QCFGEXT=\"fota_apn\",0,\"{apn}\",\"{user}\",\"{pass}\"");
+				Thread.Sleep(100);
+				foreach (var command in modInitList)
 				{
 					WritePort(command);
-					Thread.Sleep(200); // negrazu
+					Thread.Sleep(100); // negrazu
 					
 				}return true;
 			}
