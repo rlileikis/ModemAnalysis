@@ -40,6 +40,13 @@ namespace ModemAnalysis
 			"AT+CPIN?",
 			"AT+COPS?",
 			"AT+CREG?",
+			"AT+CSQ",
+			"AT+QGMR"
+		};
+
+		public List<string> deviceOrModemList = new List<string>()
+		{
+			"GET,ID,HW;",
 			"AT+QGMR"
 		};
 
@@ -192,6 +199,24 @@ namespace ModemAnalysis
 					Thread.Sleep(100); // negrazu
 					
 				}return true;
+			}
+			else
+			{
+				return false;
+			}
+
+		}
+
+		public bool DeviceOrModem()
+		{
+			if (serialPort.IsOpen == true)
+			{
+				foreach (var command in deviceOrModemList)
+				{
+					WritePort(command);
+					Thread.Sleep(100); // negrazu
+				}
+				return true;
 			}
 			else
 			{
