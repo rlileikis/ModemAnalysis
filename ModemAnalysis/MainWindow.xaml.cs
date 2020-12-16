@@ -27,6 +27,8 @@ namespace ModemAnalysis
         readonly string correctFW = "BG96MAR02A07M1G_01.018.01.018";
         readonly string unknownStatus = "Unknown";
         readonly string waitingString = "Waiting";
+        readonly int newFwIndexInComboBox = 0;
+        //readonly int oldFwIndexInComboBox = 1;
         public MainWindow()
 		{
             InitializeComponent();
@@ -47,9 +49,6 @@ namespace ModemAnalysis
 
         public void PrintDebug(string str)
 		{
-			//richTextBox_PrintAll.AppendText(str);
-			//richTextBox_PrintAll.AppendText(Environment.NewLine);
-			//richTextBox_PrintAll.ScrollToEnd();
 			TextBox_PrintAll.AppendText(str);
 			TextBox_PrintAll.AppendText(Environment.NewLine);
 			TextBox_PrintAll.ScrollToEnd();
@@ -57,22 +56,23 @@ namespace ModemAnalysis
 
         private void Button_Click_Connect(object sender, RoutedEventArgs e)
 		{
-			//printDebug("Prisijungiam prie porto");
+            //printDebug("Prisijungiam prie porto");
             if (isConnected == false)
-			{
-				OpenPort();
-				Comm.DeviceOrModem();
-			}
-			else
+            {
+                OpenPort();
+                Comm.CheckIfItIsDeviceOrModem();
+            }
+            else
             {
                 ClosePort();
+                MakeLablesUnknownAgain();
+                MakeButtonsDisabledAgain();
             }
         }
 
 		private void MyWindow_Loaded(object sender, RoutedEventArgs e)
 		{
 			PrintDebug("Make sure device is connected to the USB and Power supply");
-            //PrintDebug("Connect to the device");
         }
 
 		private void Button_Click_GoToTestMode(object sender, RoutedEventArgs e)
@@ -81,19 +81,15 @@ namespace ModemAnalysis
             {
                 if (MessageBox.Show("Do you want to use blank APN?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
                 {
-                    //do no stuff
-                    //do nothing
+                    //If no, then do nothing
                 }
                 else
-                {// do yes stuff
-                    PrintDebug("Going to Test Mode. Please wait..");
+                {// If yes do then
                     GoToTestMode();
                 }
-
             }
             else
             {
-                PrintDebug("Going to Test Mode. Please wait..");
                 GoToTestMode();
             }
 
@@ -101,7 +97,8 @@ namespace ModemAnalysis
 
 		private void GoToTestMode()
 		{
-			if (Comm.GotoTestMode(GetPortFromComboList())) // pakeist comm
+            PrintDebug("Going to Test Mode. Please wait..");
+            if (Comm.GotoTestMode(GetPortFromComboList()))
 			{
 				PrintDebug("Test Mode success");
                 PrintDebug("Waiting for modem");
@@ -109,9 +106,9 @@ namespace ModemAnalysis
 			else
 			{
 				PrintDebug("Device is disconnected, trying to reconnect.");
-				OpenPort();
-				PrintDebug("Start test again");
-			}
+				if (OpenPort()) PrintDebug("Start test again");
+                else PrintDebug("Check connection");
+            }
 		}
 
 		private void Button_CheckModemStatus(object sender, RoutedEventArgs e)
@@ -166,11 +163,12 @@ namespace ModemAnalysis
             //https://ruptelafwsa.blob.core.windows.net/fwsa/BG96FW/BG96MAR02A07M1G_01.016.01.016-BG96MAR02A07M1G_01.018.01.018.bin
             comboBox_DfotaSelection.Items.Add("BG96MAR02A07M1G_01.016.01.016 -> BG96MAR02A07M1G_01.018.01.018.bin"); // ID: 0
             comboBox_DfotaSelection.Items.Add("BG96MAR02A07M1G_01.018.01.018 -> BG96MAR02A07M1G_01.016.01.016.bin"); // ID: 1
+            comboBox_DfotaSelection.SelectedIndex = newFwIndexInComboBox;
         }
 
 
 
-        public void OpenPort()
+        public bool OpenPort()
         {
 
             if (comboBox_PortSelection.SelectedIndex > -1)
@@ -183,13 +181,16 @@ namespace ModemAnalysis
 					PrintDebug($">>> Connected to port {GetPortFromComboList()}");
                     MakeLablesUnknownAgain();
                     stat_TestMode.Fill = Brushes.Green;
+                    return true;
 				}
 				else
 				{
 					PrintDebug($">>> Can't connect to port {GetPortFromComboList()}");
+                    return false;
 				}
 			}
 			else MessageBox.Show("Choose port");
+            return false;
             
         }
 
@@ -197,16 +198,25 @@ namespace ModemAnalysis
 		{
 			lbl_ModVer.Content = unknownStatus;
 			lbl_Operator.Content = unknownStatus;
+            lbl_OpStatus.Content = unknownStatus;
 			lbl_Signal.Content = unknownStatus;
 			lbl_Status.Content = unknownStatus;
 
             lbl_ModVer.Background = Brushes.Transparent;
             lbl_Operator.Background = Brushes.Transparent;
+            lbl_OpStatus.Background = Brushes.Transparent;
             lbl_Signal.Background = Brushes.Transparent;
             lbl_Status.Background = Brushes.Transparent;
         }
 
-		private string GetPortFromComboList()
+        private void MakeButtonsDisabledAgain()
+        {
+            btn_CheckModemStatus.IsEnabled = false;
+            btn_GoToTestMode.IsEnabled = false;
+            btn_ModemFwUpdate.IsEnabled = false;
+        }
+
+        private string GetPortFromComboList()
 		{
 			return comboBox_PortSelection.SelectedItem.ToString().Substring(0, comboBox_PortSelection.SelectedItem.ToString().IndexOf(" "));
 		}
@@ -223,52 +233,106 @@ namespace ModemAnalysis
 
 		private void TextBox_PrintAll_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
 		{
-            string lastLine = TextBox_PrintAll.Text.Split('\n').LastOrDefault();
+			//Hard to define all possible answers. doing try catch
+			try
+			{
+                string lastLine = TextBox_PrintAll.Text.Split('\n').LastOrDefault();
 
-            if (lastLine.Contains("ERROR")) lbl_Status.Content = "Error";
-            if (lastLine.Contains("READY")) lbl_Status.Content = "Ready";
+                if (lastLine.Contains("ERROR")) lbl_Status.Content = "Error";
+                if (lastLine.Contains("READY")) lbl_Status.Content = "Ready";
 
-            if (lastLine.Contains("BG96")) //means that it is IN the Test Mode
-            {
-                lbl_ModVer.Content = lastLine; //pagalvoti del kitu modemu
-                if (lbl_ModVer.Content.ToString() == correctFW) lbl_ModVer.Background = Brushes.LightGreen;
-                else lbl_ModVer.Background = Brushes.Tomato;
-                btn_GoToTestMode.IsEnabled = false;
+                if (lastLine.Contains("BG96") && !lastLine.Contains("ID,MODEM")) //means that it is IN the Test Mode
+                {
+                    lbl_ModVer.Content = lastLine; //pagalvoti del kitu modemu
+                    ColorModVerLableAccordingly();
+                    btn_GoToTestMode.IsEnabled = false;
+                    btn_CheckModemStatus.IsEnabled = true;
+                    btn_ModemFwUpdate.IsEnabled = true;
+                }
+
+                if (lastLine.Contains("Test Mode")) //means that it is IN the Test Mode
+                {
+                    btn_GoToTestMode.IsEnabled = false;
+                }
+
+                if (lastLine.Contains("COPS"))
+                {
+                    var match = Regex.Match(lastLine, "\"([^\"]*)\"").Groups[1].Value;
+
+                    //string comPortName = Regex.Match(comboBox_Port.Text, @"COM([^ ]*) ").Groups[1].Value;
+
+                    lbl_Operator.Content = match;
+                }
+
+                if (lastLine.Contains("APP"))
+                {
+                    Comm.ModemInit(txtBx_APN.Text, txtBx_User.Text, txtBx_Pass.Text);
+                    lbl_Operator.Content = waitingString;
+                    lbl_Signal.Content = waitingString;
+                    //btn_CheckModemStatus.IsEnabled = true;
+                }
+
+                if (lastLine.Contains("ID,MODEM")) //means that it is NOT in the TestMode
+                {
+                    var matchG1 = Regex.Match(lastLine, "ID,MODEM,([^\"]*);").Groups[1].Value;
+                    if (matchG1 == "") lbl_ModVer.Content = "Reconnect after 10s or go to TestMode";
+                    else lbl_ModVer.Content = matchG1;
+                    ColorModVerLableAccordingly();
+                    btn_GoToTestMode.IsEnabled = true;
+                    btn_CheckModemStatus.IsEnabled = false;
+                    btn_ModemFwUpdate.IsEnabled = false;
+                }
+
+                if (lastLine.Contains("CSQ")) //checks signal level
+                {
+                    var match = Regex.Match(lastLine, "\\+CSQ:\\ (\\d*),(\\d*)").Groups[1].Value;
+                    lbl_Signal.Content = $"{match} out of 31";
+                }
+
+
+                if (lastLine.Contains("REG"))
+                {   //Faster to firstly match "REG" instead of doing Regex everytime
+                    Regex rg = new Regex("REG: (\\d),(\\d),\"[^\"]*\",\"[^\"]*\",(\\d)");
+                    if (rg.IsMatch(lastLine))
+                    {
+                        var regVal = int.Parse(Regex.Match(lastLine, "REG: (\\d),(\\d),\"[^\"]*\",\"[^\"]*\",(\\d)").Groups[2].Value);
+                        GetOpStatusString(regVal);
+                    }
+                    else
+                    {
+                        var cregVal = int.Parse(Regex.Match(lastLine, "REG: (\\d)$").Groups[1].Value);
+                        GetOpStatusString(cregVal);
+                    }
+                }
             }
 
-            if (lastLine.Contains("Test Mode")) //means that it is IN the Test Mode
-            {
-                btn_GoToTestMode.IsEnabled = false;
-            }
+            catch
+			{
 
-            if (lastLine.Contains("COPS"))
-            {
-                //string patern = @"+COPS: (d),(d),"([^"]*),(d)";
-                var match = Regex.Match(lastLine, "\"([^\"]*)\"").Groups[1].Value; //fix
-
-                //string comPortName = Regex.Match(comboBox_Port.Text, @"COM([^ ]*) ").Groups[1].Value;
-
-                lbl_Operator.Content = match;
-            }
-
-            if (lastLine.Contains("APP"))
-            {
-                Comm.ModemInit(txtBx_APN.Text, txtBx_User.Text, txtBx_Pass.Text);
-                lbl_Operator.Content = waitingString;
-                lbl_Signal.Content = waitingString;
-            }
-
-            if (lastLine.Contains("HW")) //means that it is NOT in the TestMode
-            {
-                btn_GoToTestMode.IsEnabled = true;
-            }
-
-            if (lastLine.Contains("CSQ")) //means that it is NOT in the TestMode
-            {
-                lbl_Signal.Content = lastLine;
-            }
-
+			}
+                       
         }
+
+		private void GetOpStatusString(int cregVal)
+		{
+			lbl_OpStatus.Content = cregVal switch
+			{
+				0 => "No reg, no search",
+				1 => "Registered, home",
+				2 => "No reg, searching",
+				3 => "Red denied",
+				4 => "Unknown",
+				5 => "Registered, roaming",
+				-1 => unknownStatus,
+				_ => throw new NotImplementedException(),
+			};
+		}
+
+		private void ColorModVerLableAccordingly()
+		{
+			if (lbl_ModVer.Content.ToString() == correctFW) lbl_ModVer.Background = Brushes.LightGreen;
+			else lbl_ModVer.Background = Brushes.Tomato;
+		}
 
 		private void Button_GoToUpdateModemFw(object sender, RoutedEventArgs e)
 		{
@@ -282,8 +346,8 @@ namespace ModemAnalysis
             else
             {
                 PrintDebug("Device is disconnected, trying to reconnect.");
-                OpenPort();
-                PrintDebug("Start test again");
+                if (OpenPort()) PrintDebug("Start test again");
+                else PrintDebug("Check connection");
             }
 
         }

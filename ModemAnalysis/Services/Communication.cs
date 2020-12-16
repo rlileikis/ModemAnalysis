@@ -40,13 +40,14 @@ namespace ModemAnalysis
 			"AT+CPIN?",
 			"AT+COPS?",
 			"AT+CREG?",
+			"AT+CEREG?",
 			"AT+CSQ",
 			"AT+QGMR"
 		};
 
 		public List<string> deviceOrModemList = new List<string>()
 		{
-			"GET,ID,HW;",
+			"GET,ID,MODEM;",
 			"AT+QGMR"
 		};
 
@@ -207,7 +208,7 @@ namespace ModemAnalysis
 
 		}
 
-		public bool DeviceOrModem()
+		public bool CheckIfItIsDeviceOrModem()
 		{
 			if (serialPort.IsOpen == true)
 			{
