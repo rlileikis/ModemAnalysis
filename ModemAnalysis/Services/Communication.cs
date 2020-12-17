@@ -114,7 +114,6 @@ namespace ModemAnalysis
 		{
 			if (serialPort.IsOpen == true)
 			{
-				//CheckModemStatus();
 				WritePort($"AT+QFOTADL=\"{DfotaIndexToUrl(dfotaUrlIndex)}\"");
 				return true;
 			}
@@ -171,14 +170,12 @@ namespace ModemAnalysis
 				{
 					WritePort(command);
 					Thread.Sleep(100); // negrazu
-					
 				}return true;
 			}
 			else
 			{
 				return false;
 			}
-
 		}
 
 		public bool CheckIfItIsDeviceOrModem()
@@ -196,7 +193,6 @@ namespace ModemAnalysis
 			{
 				return false;
 			}
-
 		}
 
 		public bool WritePort(string line)
@@ -291,7 +287,9 @@ namespace ModemAnalysis
 			index = 0;
 		}
 
-		#region Queue
+		//Used approved methhods from https://gitlab.com/erstec/FM-Terminal_RPTMode to receive data properly.
+
+		#region Queue 
 
 		char[] lineBuffer = new char[bufferSize];
 		int index = 0;
@@ -331,11 +329,5 @@ namespace ModemAnalysis
 			rxBuffer = new byte[bufferSize];
 		}
 		#endregion
-
-
-
-
-
-
 	}
 }

@@ -1,5 +1,4 @@
-﻿using ModemAnalysis.Models;
-using ModemAnalysis.Services;
+﻿using ModemAnalysis.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,10 +16,7 @@ namespace ModemAnalysis
 	/// </summary>
 	public partial class MainWindow : Window
 	{
-        private List<ApnSetting> ApnSettings { get; set; }
-
 		readonly Communication Comm = new Communication();
-        readonly TestStep TestSteps = new TestStep();
    
         private bool isConnected = false;
 
