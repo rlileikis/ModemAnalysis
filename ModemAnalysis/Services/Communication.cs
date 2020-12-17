@@ -14,13 +14,11 @@ namespace ModemAnalysis
 	{
 		public readonly SerialPort serialPort;
 
-		Semaphore _sync = new Semaphore(1, 1);
-
 		public event EventHandler<ProcessReceivedEventArgs> ProcessReceived;
 
 		public class ProcessReceivedEventArgs : EventArgs
 		{
-			public string message { get; set; }
+			public string Message { get; set; }
 		}
 
 		public Communication()
@@ -51,18 +49,6 @@ namespace ModemAnalysis
 			"AT+QGMR"
 		};
 
-
-		public string PortName
-		{
-			get
-			{
-				return serialPort.PortName;
-			}
-			set
-			{
-				serialPort.PortName = value;
-			}
-		}
 
 		public bool OpenPort(string portName)
 		{
@@ -114,6 +100,7 @@ namespace ModemAnalysis
 				while (!OpenPort(port))
 				{
 					//Device restarts itself, so we are waiting for it to be connected again.
+					//Need to rethink later
 				}
 				return true;
 			}
@@ -129,7 +116,6 @@ namespace ModemAnalysis
 			{
 				//CheckModemStatus();
 				WritePort($"AT+QFOTADL=\"{DfotaIndexToUrl(dfotaUrlIndex)}\"");
-				//MessageBox.Show(DfotaIndexToUrl(dfotaUrlIndex));
 				return true;
 			}
 			else
@@ -154,19 +140,6 @@ namespace ModemAnalysis
 			}
 		}
 
-		public bool SendAT()
-		{
-			if (serialPort.IsOpen == true)
-			{
-				WritePort("ATI");
-				return true;
-			}
-			else
-			{
-				return false;
-			}
-
-		}
 
 
 		public bool CheckModemStatus()
@@ -298,7 +271,7 @@ namespace ModemAnalysis
 			var returnMessageString = new string(returnMessage);
 			if (!(returnMessageString == "" || returnMessageString == "OK"))
 			{
-				args.message = new string(returnMessage);
+				args.Message = new string(returnMessage);
 				OnProcessReceived(args);
 			}
 		}

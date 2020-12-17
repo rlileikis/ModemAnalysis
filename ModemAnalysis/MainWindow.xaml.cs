@@ -27,6 +27,7 @@ namespace ModemAnalysis
         readonly string correctFW = "BG96MAR02A07M1G_01.018.01.018";
         readonly string unknownStatus = "Unknown";
         readonly string waitingString = "Waiting";
+        readonly string CheckStatusString = "Check Modem status";
         readonly int newFwIndexInComboBox = 0;
         //readonly int oldFwIndexInComboBox = 1;
         public MainWindow()
@@ -43,7 +44,7 @@ namespace ModemAnalysis
         {
             this.Dispatcher.Invoke(() => 
             {
-                PrintDebug(e.message);
+                PrintDebug(e.Message);
             });
         }
 
@@ -180,7 +181,6 @@ namespace ModemAnalysis
 					isConnected = true;
 					PrintDebug($">>> Connected to port {GetPortFromComboList()}");
                     MakeLablesUnknownAgain();
-                    stat_TestMode.Fill = Brushes.Green;
                     return true;
 				}
 				else
@@ -239,7 +239,13 @@ namespace ModemAnalysis
                 string lastLine = TextBox_PrintAll.Text.Split('\n').LastOrDefault();
 
                 if (lastLine.Contains("ERROR")) lbl_Status.Content = "Error";
-                if (lastLine.Contains("READY")) lbl_Status.Content = "Ready";
+                if (lastLine.Contains("READY"))
+                {
+                    lbl_Status.Content = "Ready for command";
+                    lbl_ModVer.Content = unknownStatus;
+                }
+
+                
 
                 if (lastLine.Contains("BG96") && !lastLine.Contains("ID,MODEM")) //means that it is IN the Test Mode
                 {
@@ -267,8 +273,8 @@ namespace ModemAnalysis
                 if (lastLine.Contains("APP"))
                 {
                     Comm.ModemInit(txtBx_APN.Text, txtBx_User.Text, txtBx_Pass.Text);
-                    lbl_Operator.Content = waitingString;
-                    lbl_Signal.Content = waitingString;
+                    lbl_Operator.Content = CheckStatusString;
+                    lbl_Signal.Content = CheckStatusString;
                     //btn_CheckModemStatus.IsEnabled = true;
                 }
 
@@ -292,16 +298,27 @@ namespace ModemAnalysis
 
                 if (lastLine.Contains("REG"))
                 {   //Faster to firstly match "REG" instead of doing Regex everytime
-                    Regex rg = new Regex("REG: (\\d),(\\d),\"[^\"]*\",\"[^\"]*\",(\\d)");
-                    if (rg.IsMatch(lastLine))
+                    String pattern1 = "REG: (\\d),(\\d),\"[^\"]*\",\"[^\"]*\",(\\d)";
+                    String pattern2 = "REG: (\\d),\"[^\"]*\",\"[^\"]*\",(\\d)";
+                    String pattern3 = "REG: (\\d)$";
+
+                    if (Regex.IsMatch(lastLine, pattern1))
                     {
-                        var regVal = int.Parse(Regex.Match(lastLine, "REG: (\\d),(\\d),\"[^\"]*\",\"[^\"]*\",(\\d)").Groups[2].Value);
+                        var regVal = int.Parse(Regex.Match(lastLine, pattern1).Groups[2].Value);
                         GetOpStatusString(regVal);
+                        ModemFwUpdateButtonStatus(regVal);
+                    }
+                    else if (Regex.IsMatch(lastLine, pattern2))
+					{
+                        var regVal = int.Parse(Regex.Match(lastLine, pattern2).Groups[1].Value);
+                        GetOpStatusString(regVal);
+                        ModemFwUpdateButtonStatus(regVal);
                     }
                     else
                     {
-                        var cregVal = int.Parse(Regex.Match(lastLine, "REG: (\\d)$").Groups[1].Value);
-                        GetOpStatusString(cregVal);
+                        var regVal = int.Parse(Regex.Match(lastLine, pattern3).Groups[1].Value);
+                        GetOpStatusString(regVal);
+                        ModemFwUpdateButtonStatus(regVal);
                     }
                 }
             }
@@ -323,12 +340,17 @@ namespace ModemAnalysis
 				3 => "Red denied",
 				4 => "Unknown",
 				5 => "Registered, roaming",
-				-1 => unknownStatus,
-				_ => throw new NotImplementedException(),
+				_ => unknownStatus
 			};
 		}
 
-		private void ColorModVerLableAccordingly()
+        private void ModemFwUpdateButtonStatus(int cregVal)
+        {
+            if (cregVal == 1 || cregVal == 5) btn_ModemFwUpdate.IsEnabled = true;
+            else btn_ModemFwUpdate.IsEnabled = false;
+        }
+
+        private void ColorModVerLableAccordingly()
 		{
 			if (lbl_ModVer.Content.ToString() == correctFW) lbl_ModVer.Background = Brushes.LightGreen;
 			else lbl_ModVer.Background = Brushes.Tomato;
