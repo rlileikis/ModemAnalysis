@@ -51,7 +51,6 @@ namespace ModemAnalysis
 
         private void Button_Click_Connect(object sender, RoutedEventArgs e)
 		{
-            //printDebug("Prisijungiam prie porto");
             if (isConnected == false)
             {
                 OpenPort();
@@ -239,7 +238,6 @@ namespace ModemAnalysis
                     ColorModVerLableAccordingly();
                     btn_GoToTestMode.IsEnabled = false;
                     btn_CheckModemStatus.IsEnabled = true;
-                    //btn_ModemFwUpdate.IsEnabled = true;
                 }
 
                 if (lastLine.Contains("Test Mode")) //means that it is IN the Test Mode
@@ -250,9 +248,6 @@ namespace ModemAnalysis
                 if (lastLine.Contains("COPS"))
                 {
                     var match = Regex.Match(lastLine, "\"([^\"]*)\"").Groups[1].Value;
-
-                    //string comPortName = Regex.Match(comboBox_Port.Text, @"COM([^ ]*) ").Groups[1].Value;
-
                     lbl_Operator.Content = match;
                 }
 
@@ -261,7 +256,6 @@ namespace ModemAnalysis
                     Comm.ModemInit(txtBx_APN.Text, txtBx_User.Text, txtBx_Pass.Text);
                     lbl_Operator.Content = CheckStatusString;
                     lbl_Signal.Content = CheckStatusString;
-                    //btn_CheckModemStatus.IsEnabled = true;
                 }
 
                 if (lastLine.Contains("ID,MODEM")) //means that it is NOT in the TestMode
