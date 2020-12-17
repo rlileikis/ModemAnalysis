@@ -18,7 +18,7 @@
         <Label Content="Port:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="20" Padding="0" Width="29"/>
         <ComboBox x:Name="comboBox_PortSelection" HorizontalAlignment="Left" Margin="44,10,0,0" VerticalAlignment="Top" Width="291" Height="20" DropDownOpened="comboBox_PortSelection_DropDownOpened"/>
         <Button x:Name="btn_Connect" Content="Connect" Margin="340,10,0,0" VerticalAlignment="Top" Click="Button_Click_Connect" Height="20"/>
-        <Button x:Name="btn_GoToTestMode" Content="Go to Test Mode" Grid.Column="1" HorizontalAlignment="Left" Margin="57,0,0,0" Grid.Row="1" VerticalAlignment="Top" Width="126" Height="20" Click="Button_Click_GoToTestMode" IsEnabled="False"/>
+        <Button x:Name="btn_GoToTestMode" Content="Start Process" Grid.Column="1" HorizontalAlignment="Left" Margin="57,0,0,0" Grid.Row="1" VerticalAlignment="Top" Width="126" Height="20" Click="Button_Click_GoToTestMode" IsEnabled="False"/>
         <TextBox x:Name="txtBx_APN" HorizontalAlignment="Left" Height="20
                  " Margin="44,360,0,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" RenderTransformOrigin="0.983,1.174"/>
         <Label Content="APN:" HorizontalAlignment="Left" Margin="10,361,0,0" VerticalAlignment="Top" Height="20" Padding="0" Width="29" Grid.Row="1" RenderTransformOrigin="0.517,1.15"/>

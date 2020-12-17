@@ -253,7 +253,7 @@ namespace ModemAnalysis
                     ColorModVerLableAccordingly();
                     btn_GoToTestMode.IsEnabled = false;
                     btn_CheckModemStatus.IsEnabled = true;
-                    btn_ModemFwUpdate.IsEnabled = true;
+                    //btn_ModemFwUpdate.IsEnabled = true;
                 }
 
                 if (lastLine.Contains("Test Mode")) //means that it is IN the Test Mode
