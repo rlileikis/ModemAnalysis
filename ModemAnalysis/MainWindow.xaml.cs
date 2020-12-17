@@ -1,5 +1,4 @@
-﻿using ModemAnalysis.Services;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management;
@@ -22,21 +21,20 @@ namespace ModemAnalysis
 
         readonly string correctFW = "BG96MAR02A07M1G_01.018.01.018";
         readonly string unknownStatus = "Unknown";
-        readonly string waitingString = "Waiting";
-        readonly string CheckStatusString = "Check Modem status";
+		readonly string CheckStatusString = "Check Modem status";
         readonly int newFwIndexInComboBox = 0;
-        //readonly int oldFwIndexInComboBox = 1;
         public MainWindow()
 		{
             InitializeComponent();
             //Loaded += MyWindow_Loaded;
             InitPortNames();
             InitDfotaUrls();
-            Comm.ProcessReceived += c_ProcessReceived;
+            Comm.ProcessReceived += C_ProcessReceived;
 
         }
 
-        public void c_ProcessReceived(object sender, ProcessReceivedEventArgs e)
+        // Example https://docs.microsoft.com/en-us/dotnet/standard/events/how-to-raise-and-consume-events
+        public void C_ProcessReceived(object sender, ProcessReceivedEventArgs e)
         {
             this.Dispatcher.Invoke(() => 
             {
@@ -110,23 +108,17 @@ namespace ModemAnalysis
 
 		private void Button_CheckModemStatus(object sender, RoutedEventArgs e)
         {
-            //Comm.WritePort("ATI");
-            var response = Comm.CheckModemStatus();
-            //PrintDebug(response);
-            //TestSteps.SendAT();
+            Comm.CheckModemStatus();
         }
 
-        private void btn_ModemInit_Click(object sender, RoutedEventArgs e)
+        private void Button_ModemInit_Click(object sender, RoutedEventArgs e)
         {
-            //Comm.WritePort("ATI");
-            var response = Comm.ModemInit(txtBx_APN.Text, txtBx_User.Text, txtBx_Pass.Text);
-            //PrintDebug(response);
-            //TestSteps.SendAT();
+            Comm.ModemInit(txtBx_APN.Text, txtBx_User.Text, txtBx_Pass.Text);
         }
 
         private void InitPortNames()
         {
-            string trimmedComPortName = "";
+            string trimmedComPortName;
             comboBox_PortSelection.Items.Clear();
             try
             {
@@ -167,7 +159,6 @@ namespace ModemAnalysis
 
         public bool OpenPort()
         {
-
             if (comboBox_PortSelection.SelectedIndex > -1)
 			{
 				if (Comm.OpenPort(GetPortFromComboList()))
@@ -187,7 +178,6 @@ namespace ModemAnalysis
 			}
 			else MessageBox.Show("Choose port");
             return false;
-            
         }
 
 		private void MakeLablesUnknownAgain()
@@ -356,10 +346,9 @@ namespace ModemAnalysis
 		{
 
 
-            if (Comm.StartDfota(GetPortFromComboList(), comboBox_DfotaSelection.SelectedIndex))
+            if (Comm.StartDfota(comboBox_DfotaSelection.SelectedIndex))
             {
                 PrintDebug("DFOTA update initiated");
-
             }
             else
             {
@@ -367,14 +356,12 @@ namespace ModemAnalysis
                 if (OpenPort()) PrintDebug("Start test again");
                 else PrintDebug("Check connection");
             }
-
         }
 
-		private void comboBox_PortSelection_DropDownOpened(object sender, EventArgs e)
+		private void ComboBox_PortSelection_DropDownOpened(object sender, EventArgs e)
 		{
             InitPortNames();
         }
-
 	}
 
 

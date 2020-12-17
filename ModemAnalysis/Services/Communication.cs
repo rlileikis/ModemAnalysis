@@ -1,5 +1,4 @@
-﻿using ModemAnalysis.Services;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
@@ -110,7 +109,7 @@ namespace ModemAnalysis
 			}
 		}
 
-		public bool StartDfota(string port, int dfotaUrlIndex)
+		public bool StartDfota(int dfotaUrlIndex)
 		{
 			if (serialPort.IsOpen == true)
 			{
@@ -125,18 +124,12 @@ namespace ModemAnalysis
 
 		private string DfotaIndexToUrl(int index)
 		{
-			switch (index)
+			return index switch
 			{
-				case 0:
-					return "https://ruptelafwsa.blob.core.windows.net/fwsa/BG96FW/BG96MAR02A07M1G_01.016.01.016-BG96MAR02A07M1G_01.018.01.018.bin";
-
-				case 1:
-					return "https://ruptelafwsa.blob.core.windows.net/fwsa/BG96FW/BG96MAR02A07M1G_01.018.01.018-BG96MAR02A07M1G_01.016.01.016.bin";
-
-				default:
-					return "";
-	
-			}
+				0 => "https://ruptelafwsa.blob.core.windows.net/fwsa/BG96FW/BG96MAR02A07M1G_01.016.01.016-BG96MAR02A07M1G_01.018.01.018.bin",
+				1 => "https://ruptelafwsa.blob.core.windows.net/fwsa/BG96FW/BG96MAR02A07M1G_01.018.01.018-BG96MAR02A07M1G_01.016.01.016.bin",
+				_ => "",
+			};
 		}
 
 
@@ -272,13 +265,10 @@ namespace ModemAnalysis
 			}
 		}
 
+		// Example https://docs.microsoft.com/en-us/dotnet/standard/events/how-to-raise-and-consume-events
 		protected virtual void OnProcessReceived(ProcessReceivedEventArgs e)
 		{
-			EventHandler<ProcessReceivedEventArgs> handler = ProcessReceived;
-			if (handler != null)
-			{
-				handler(this, e);
-			}
+			ProcessReceived?.Invoke(this, e);
 		}
 
 		public void ResetBuffer()
