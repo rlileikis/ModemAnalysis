@@ -92,6 +92,7 @@ namespace ModemAnalysis
 		private void GoToTestMode()
 		{
             PrintDebug("Going to Test Mode. Please wait..");
+            MakeLablesUnknownAgain();
             if (Comm.GotoTestMode(GetPortFromComboList()))
 			{
 				PrintDebug("Test Mode success");
@@ -186,7 +187,9 @@ namespace ModemAnalysis
             lbl_OpStatus.Content = unknownStatus;
 			lbl_Signal.Content = unknownStatus;
 			lbl_Status.Content = unknownStatus;
+			lbl_FOTAStatus.Content = unknownStatus;
 
+			lbl_FOTAStatus.Background = Brushes.Transparent;
             lbl_ModVer.Background = Brushes.Transparent;
             lbl_Operator.Background = Brushes.Transparent;
             lbl_OpStatus.Background = Brushes.Transparent;
@@ -221,94 +224,154 @@ namespace ModemAnalysis
 			//Hard to define all possible answers. doing try catch
 			try
 			{
-                string lastLine = TextBox_PrintAll.Text.Split('\n').LastOrDefault();
+				string lastLine = TextBox_PrintAll.Text.Split('\n').LastOrDefault();
+				AnalyseReceivedData(lastLine);
+			}
 
-                if (lastLine.Contains("ERROR")) lbl_Status.Content = "Error";
-                if (lastLine.Contains("READY"))
-                {
-                    lbl_Status.Content = "Ready for command";
-                    lbl_ModVer.Content = unknownStatus;
-                }
-
-                
-
-                if (lastLine.Contains("BG96") && !lastLine.Contains("ID,MODEM")) //means that it is IN the Test Mode
-                {
-                    lbl_ModVer.Content = lastLine; //pagalvoti del kitu modemu
-                    ColorModVerLableAccordingly();
-                    btn_GoToTestMode.IsEnabled = false;
-                    btn_CheckModemStatus.IsEnabled = true;
-                }
-
-                if (lastLine.Contains("Test Mode")) //means that it is IN the Test Mode
-                {
-                    btn_GoToTestMode.IsEnabled = false;
-                }
-
-                if (lastLine.Contains("COPS"))
-                {
-                    var match = Regex.Match(lastLine, "\"([^\"]*)\"").Groups[1].Value;
-                    lbl_Operator.Content = match;
-                }
-
-                if (lastLine.Contains("APP"))
-                {
-                    Comm.ModemInit(txtBx_APN.Text, txtBx_User.Text, txtBx_Pass.Text);
-                    lbl_Operator.Content = CheckStatusString;
-                    lbl_Signal.Content = CheckStatusString;
-                }
-
-                if (lastLine.Contains("ID,MODEM")) //means that it is NOT in the TestMode
-                {
-                    var matchG1 = Regex.Match(lastLine, "ID,MODEM,([^\"]*);").Groups[1].Value;
-                    if (matchG1 == "") lbl_ModVer.Content = "Reconnect after 10s or go to TestMode";
-                    else lbl_ModVer.Content = matchG1;
-                    ColorModVerLableAccordingly();
-                    btn_GoToTestMode.IsEnabled = true;
-                    btn_CheckModemStatus.IsEnabled = false;
-                    btn_ModemFwUpdate.IsEnabled = false;
-                }
-
-                if (lastLine.Contains("CSQ")) //checks signal level
-                {
-                    var match = Regex.Match(lastLine, "\\+CSQ:\\ (\\d*),(\\d*)").Groups[1].Value;
-                    lbl_Signal.Content = $"{match} out of 31";
-                }
-
-
-                if (lastLine.Contains("REG"))
-                {   //Faster to firstly match "REG" instead of doing Regex everytime
-                    String pattern1 = "REG: (\\d),(\\d),\"[^\"]*\",\"[^\"]*\",(\\d)";
-                    String pattern2 = "REG: (\\d),\"[^\"]*\",\"[^\"]*\",(\\d)";
-                    String pattern3 = "REG: (\\d)$";
-
-                    if (Regex.IsMatch(lastLine, pattern1))
-                    {
-                        var regVal = int.Parse(Regex.Match(lastLine, pattern1).Groups[2].Value);
-                        GetOpStatusString(regVal);
-                        ModemFwUpdateButtonStatus(regVal);
-                    }
-                    else if (Regex.IsMatch(lastLine, pattern2))
-					{
-                        var regVal = int.Parse(Regex.Match(lastLine, pattern2).Groups[1].Value);
-                        GetOpStatusString(regVal);
-                        ModemFwUpdateButtonStatus(regVal);
-                    }
-                    else
-                    {
-                        var regVal = int.Parse(Regex.Match(lastLine, pattern3).Groups[1].Value);
-                        GetOpStatusString(regVal);
-                        ModemFwUpdateButtonStatus(regVal);
-                    }
-                }
-            }
-
-            catch
+			catch
 			{
 
 			}
                        
         }
+
+		private void AnalyseReceivedData(string lastLine)
+		{
+			if (lastLine.Contains("ERROR")) lbl_Status.Content = "Error";
+			if (lastLine.Contains("READY"))
+			{
+				MakeLablesUnknownAgain();
+				lbl_Status.Content = "Ready for command";
+			}
+
+			if (lastLine.Contains("BG96") && !lastLine.Contains("ID,MODEM")) //means that it is IN the Test Mode
+			{
+				lbl_ModVer.Content = lastLine; //pagalvoti del kitu modemu
+				ColorModVerLableAccordingly();
+				btn_GoToTestMode.IsEnabled = false;
+				btn_CheckModemStatus.IsEnabled = true;
+			}
+
+			if (lastLine.Contains("Test Mode")) //means that it is IN the Test Mode
+			{
+				btn_GoToTestMode.IsEnabled = false;
+			}
+
+			if (lastLine.Contains("COPS"))
+			{
+				var match = Regex.Match(lastLine, "\"([^\"]*)\"").Groups[1].Value;
+				lbl_Operator.Content = match;
+			}
+
+			if (lastLine.Contains("APP"))
+			{
+				Comm.ModemInit(txtBx_APN.Text, txtBx_User.Text, txtBx_Pass.Text);
+				lbl_Operator.Content = CheckStatusString;
+				lbl_Signal.Content = CheckStatusString;
+			}
+
+			if (lastLine.Contains("ID,MODEM")) //means that it is NOT in the TestMode
+			{
+				var matchG1 = Regex.Match(lastLine, "ID,MODEM,([^\"]*);").Groups[1].Value;
+				if (matchG1 == "") lbl_ModVer.Content = "Reconnect after 10s or go to TestMode";
+				else lbl_ModVer.Content = matchG1;
+				ColorModVerLableAccordingly();
+				btn_GoToTestMode.IsEnabled = true;
+				btn_CheckModemStatus.IsEnabled = false;
+				btn_ModemFwUpdate.IsEnabled = false;
+			}
+
+			if (lastLine.Contains("CSQ")) //checks signal level
+			{
+				var match = Regex.Match(lastLine, "\\+CSQ:\\ (\\d*),(\\d*)").Groups[1].Value;
+				lbl_Signal.Content = $"{match} out of 31";
+			}
+
+
+			if (lastLine.Contains("REG"))
+			{   //Faster to firstly match "REG" instead of doing Regex everytime
+				string pattern1 = "REG: (\\d),(\\d),\"[^\"]*\",\"[^\"]*\",(\\d)";
+				string pattern2 = "REG: (\\d),\"[^\"]*\",\"[^\"]*\",(\\d)";
+				string pattern3 = "REG: (\\d)$";
+
+				if (Regex.IsMatch(lastLine, pattern1))
+				{
+					var regVal = int.Parse(Regex.Match(lastLine, pattern1).Groups[2].Value);
+					GetOpStatusString(regVal);
+					ModemFwUpdateButtonStatus(regVal);
+				}
+				else if (Regex.IsMatch(lastLine, pattern2))
+				{
+					var regVal = int.Parse(Regex.Match(lastLine, pattern2).Groups[1].Value);
+					GetOpStatusString(regVal);
+					ModemFwUpdateButtonStatus(regVal);
+				}
+				else
+				{
+					var regVal = int.Parse(Regex.Match(lastLine, pattern3).Groups[1].Value);
+					GetOpStatusString(regVal);
+					ModemFwUpdateButtonStatus(regVal);
+				}
+			}
+
+			if (lastLine.Contains("HTTPSTART")) //FOTA started
+			{
+				btn_CheckModemStatus.IsEnabled = false;
+				btn_ModemFwUpdate.IsEnabled = false;
+			}
+
+			if (lastLine.Contains("END")) //FOTA finished
+			{
+				string httpendPattern = "\\+QIND: \"FOTA\",\"HTTPEND\",(\\d *)";
+				string endPattern = "\\+QIND: \"FOTA\",\"HTTPEND\",(\\d *)";
+				if (Regex.IsMatch(lastLine, httpendPattern))
+				{
+					var fotaStatus = int.Parse(Regex.Match(lastLine, httpendPattern).Groups[1].Value);
+					lbl_FOTAStatus.Content = PrintDfotaDownStatus(fotaStatus);
+				}
+
+				if (Regex.IsMatch(lastLine, endPattern))
+				{
+					var fotaStatus = int.Parse(Regex.Match(lastLine, endPattern).Groups[1].Value);
+					lbl_FOTAStatus.Content = PrintDfotaUpgrStatus(fotaStatus);
+				}
+
+				btn_CheckModemStatus.IsEnabled = true;
+				lbl_ModVer.Content = unknownStatus;
+				lbl_ModVer.Background = Brushes.Transparent;
+			}
+		}
+
+		private string PrintDfotaDownStatus(int fotaStatus)
+		{
+			return fotaStatus switch
+			{
+				0 => "Download successful",
+				701 => "HTTP(S) unknown error",
+				702 => "Server connection failed",
+				703 => "Request failed",
+				704 => "Download timeout",
+				706 => "File not exist",
+				707 => "Write data to file failed",
+				708 => "Downloaded file is too large",
+				_ => unknownStatus
+			};
+		}
+
+		private string PrintDfotaUpgrStatus(int fotaStatus)
+		{
+			return fotaStatus switch
+			{
+				0 => "Upgraded successfully",
+				504 => "Firmware upgrade failed",
+				505 => "Upgrade package not exist",
+				506 => "Upgrade package check failed",
+				511 => "Package is mismatched with the current firmware",
+				_ => unknownStatus
+			};
+		}
+
+
 
 		private void GetOpStatusString(int cregVal)
 		{
@@ -338,8 +401,7 @@ namespace ModemAnalysis
 
 		private void Button_GoToUpdateModemFw(object sender, RoutedEventArgs e)
 		{
-
-
+			lbl_FOTAStatus.Content = unknownStatus;
             if (Comm.StartDfota(comboBox_DfotaSelection.SelectedIndex))
             {
                 PrintDebug("DFOTA update initiated");
