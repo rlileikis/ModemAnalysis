@@ -316,6 +316,7 @@ namespace ModemAnalysis
 
 			if (lastLine.Contains("HTTPSTART")) //FOTA started
 			{
+				lbl_FOTAStatus.Content = "Started";
 				btn_CheckModemStatus.IsEnabled = false;
 				btn_ModemFwUpdate.IsEnabled = false;
 			}
@@ -323,7 +324,7 @@ namespace ModemAnalysis
 			if (lastLine.Contains("END")) //FOTA finished
 			{
 				string httpendPattern = "\\+QIND: \"FOTA\",\"HTTPEND\",(\\d *)";
-				string endPattern = "\\+QIND: \"FOTA\",\"HTTPEND\",(\\d *)";
+				string endPattern = "\\+QIND: \"FOTA\",\"END\",(\\d *)";
 				if (Regex.IsMatch(lastLine, httpendPattern))
 				{
 					var fotaStatus = int.Parse(Regex.Match(lastLine, httpendPattern).Groups[1].Value);
@@ -334,11 +335,15 @@ namespace ModemAnalysis
 				{
 					var fotaStatus = int.Parse(Regex.Match(lastLine, endPattern).Groups[1].Value);
 					lbl_FOTAStatus.Content = PrintDfotaUpgrStatus(fotaStatus);
+					if (fotaStatus == 0) 
+					{
+						btn_CheckModemStatus.IsEnabled = true;
+						lbl_ModVer.Content = unknownStatus;
+						lbl_ModVer.Background = Brushes.Transparent;
+					}
 				}
 
-				btn_CheckModemStatus.IsEnabled = true;
-				lbl_ModVer.Content = unknownStatus;
-				lbl_ModVer.Background = Brushes.Transparent;
+
 			}
 		}
 
