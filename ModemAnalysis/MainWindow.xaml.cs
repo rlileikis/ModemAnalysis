@@ -187,9 +187,7 @@ namespace ModemAnalysis
             lbl_OpStatus.Content = unknownStatus;
 			lbl_Signal.Content = unknownStatus;
 			lbl_Status.Content = unknownStatus;
-			lbl_FOTAStatus.Content = unknownStatus;
 
-			lbl_FOTAStatus.Background = Brushes.Transparent;
             lbl_ModVer.Background = Brushes.Transparent;
             lbl_Operator.Background = Brushes.Transparent;
             lbl_OpStatus.Background = Brushes.Transparent;
@@ -316,7 +314,6 @@ namespace ModemAnalysis
 
 			if (lastLine.Contains("HTTPSTART")) //FOTA started
 			{
-				lbl_FOTAStatus.Content = "Started";
 				btn_CheckModemStatus.IsEnabled = false;
 				btn_ModemFwUpdate.IsEnabled = false;
 			}
@@ -328,15 +325,16 @@ namespace ModemAnalysis
 				if (Regex.IsMatch(lastLine, httpendPattern))
 				{
 					var fotaStatus = int.Parse(Regex.Match(lastLine, httpendPattern).Groups[1].Value);
-					lbl_FOTAStatus.Content = PrintDfotaDownStatus(fotaStatus);
+					//PrintDebug($"DFOTA status: {PrintDfotaDownStatus(fotaStatus)}");
 				}
 
 				if (Regex.IsMatch(lastLine, endPattern))
 				{
 					var fotaStatus = int.Parse(Regex.Match(lastLine, endPattern).Groups[1].Value);
-					lbl_FOTAStatus.Content = PrintDfotaUpgrStatus(fotaStatus);
+					//PrintDebug($"DFOTA status: {PrintDfotaUpgrStatus(fotaStatus)}");
 					if (fotaStatus == 0) 
 					{
+						//PrintDebug($"DFOTA status: {PrintDfotaUpgrStatus(fotaStatus)}");
 						btn_CheckModemStatus.IsEnabled = true;
 						lbl_ModVer.Content = unknownStatus;
 						lbl_ModVer.Background = Brushes.Transparent;
@@ -406,7 +404,6 @@ namespace ModemAnalysis
 
 		private void Button_GoToUpdateModemFw(object sender, RoutedEventArgs e)
 		{
-			lbl_FOTAStatus.Content = unknownStatus;
             if (Comm.StartDfota(comboBox_DfotaSelection.SelectedIndex))
             {
                 PrintDebug("DFOTA update initiated");
