@@ -226,7 +226,7 @@ namespace ModemAnalysis
 				//string lastLine = TextBox_PrintAll.Text.Split('\n').LastOrDefault();
 
 				string[] textboxstring = TextBox_PrintAll.Text.Split('\n');
-				string lastLine = textboxstring[textboxstring.Length - 2];
+				string lastLine = textboxstring[textboxstring.Length - 2].Replace("\r\n", "").Replace("\r", "").Replace("\n", "");
 				AnalyseReceivedData(lastLine);
 			}
 
@@ -293,7 +293,7 @@ namespace ModemAnalysis
 			{   //Faster to firstly match "REG" instead of doing Regex everytime
 				string pattern1 = "REG: (\\d),(\\d),\"[^\"]*\",\"[^\"]*\",(\\d)";
 				string pattern2 = "REG: (\\d),\"[^\"]*\",\"[^\"]*\",(\\d)";
-				string pattern3 = "REG: (\\d)$";
+				string pattern3 = "REG: (\\d)";
 
 				if (Regex.IsMatch(lastLine, pattern1))
 				{
@@ -307,7 +307,7 @@ namespace ModemAnalysis
 					GetOpStatusString(regVal);
 					ModemFwUpdateButtonStatus(regVal);
 				}
-				else
+				else if (Regex.IsMatch(lastLine, pattern3))
 				{
 					var regVal = int.Parse(Regex.Match(lastLine, pattern3).Groups[1].Value);
 					GetOpStatusString(regVal);
@@ -329,21 +329,33 @@ namespace ModemAnalysis
 				{
 					var fotaStatus = int.Parse(Regex.Match(lastLine, httpendPattern).Groups[1].Value);
 					PrintDebug($"DFOTA status: {PrintDfotaDownStatus(fotaStatus)}");
+					if (fotaStatus != 0) //if there is an error while downloading file
+					{
+						DfotaEndButtonsStatus();
+						PrintDebug("Check modem status and try to update modem again.");
+					}
 				}
 
 				if (Regex.IsMatch(lastLine, endPattern))
 				{
 					var fotaStatus = int.Parse(Regex.Match(lastLine, endPattern).Groups[1].Value);
 					PrintDebug($"DFOTA status: {PrintDfotaUpgrStatus(fotaStatus)}");
-					if (fotaStatus == 0) 
+
+					if (fotaStatus != 0) //if there is an error while upfading FW
 					{
-						PrintDebug($"DFOTA status: {PrintDfotaUpgrStatus(fotaStatus)}");
-						btn_CheckModemStatus.IsEnabled = true;
-						lbl_ModVer.Content = unknownStatus;
-						lbl_ModVer.Background = Brushes.Transparent;
+						DfotaEndButtonsStatus();
+						PrintDebug("Check modem status and try to update modem again.");
 					}
 				}
 			}
+		}
+
+		private void DfotaEndButtonsStatus()
+		{
+			btn_ModemFwUpdate.IsEnabled = true;
+			btn_CheckModemStatus.IsEnabled = true;
+			lbl_ModVer.Content = unknownStatus;
+			lbl_ModVer.Background = Brushes.Transparent;
 		}
 
 		private string PrintDfotaDownStatus(int fotaStatus)
