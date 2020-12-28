@@ -51,7 +51,7 @@ namespace ModemAnalysis
 
 		public bool OpenPort(string portName)
 		{
-			try // Need to find better solution
+			try
 			{
 				serialPort.PortName = portName;
 				serialPort.BaudRate = 115200;

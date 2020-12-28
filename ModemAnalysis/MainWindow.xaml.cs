@@ -44,8 +44,9 @@ namespace ModemAnalysis
 
         public void PrintDebug(string str)
 		{
-			TextBox_PrintAll.AppendText(str);
-			TextBox_PrintAll.AppendText(Environment.NewLine);
+			TextBox_PrintAll.AppendText($"{str}{Environment.NewLine}");
+			//TextBox_PrintAll.AppendText(str);
+			//TextBox_PrintAll.AppendText(Environment.NewLine);
 			TextBox_PrintAll.ScrollToEnd();
 		}
 
@@ -222,13 +223,15 @@ namespace ModemAnalysis
 			//Hard to define all possible answers. doing try catch
 			try
 			{
-				string lastLine = TextBox_PrintAll.Text.Split('\n').LastOrDefault();
+				//string lastLine = TextBox_PrintAll.Text.Split('\n').LastOrDefault();
+
+				string[] textboxstring = TextBox_PrintAll.Text.Split('\n');
+				string lastLine = textboxstring[textboxstring.Length - 2];
 				AnalyseReceivedData(lastLine);
 			}
 
 			catch
 			{
-
 			}
                        
         }
@@ -320,28 +323,26 @@ namespace ModemAnalysis
 
 			if (lastLine.Contains("END")) //FOTA finished
 			{
-				string httpendPattern = "\\+QIND: \"FOTA\",\"HTTPEND\",(\\d *)";
-				string endPattern = "\\+QIND: \"FOTA\",\"END\",(\\d *)";
+				string httpendPattern = "\\+QIND: \"FOTA\",\"HTTPEND\",(\\d*)";
+				string endPattern = "\\+QIND: \"FOTA\",\"END\",(\\d*)";
 				if (Regex.IsMatch(lastLine, httpendPattern))
 				{
 					var fotaStatus = int.Parse(Regex.Match(lastLine, httpendPattern).Groups[1].Value);
-					//PrintDebug($"DFOTA status: {PrintDfotaDownStatus(fotaStatus)}");
+					PrintDebug($"DFOTA status: {PrintDfotaDownStatus(fotaStatus)}");
 				}
 
 				if (Regex.IsMatch(lastLine, endPattern))
 				{
 					var fotaStatus = int.Parse(Regex.Match(lastLine, endPattern).Groups[1].Value);
-					//PrintDebug($"DFOTA status: {PrintDfotaUpgrStatus(fotaStatus)}");
+					PrintDebug($"DFOTA status: {PrintDfotaUpgrStatus(fotaStatus)}");
 					if (fotaStatus == 0) 
 					{
-						//PrintDebug($"DFOTA status: {PrintDfotaUpgrStatus(fotaStatus)}");
+						PrintDebug($"DFOTA status: {PrintDfotaUpgrStatus(fotaStatus)}");
 						btn_CheckModemStatus.IsEnabled = true;
 						lbl_ModVer.Content = unknownStatus;
 						lbl_ModVer.Background = Brushes.Transparent;
 					}
 				}
-
-
 			}
 		}
 
@@ -349,7 +350,7 @@ namespace ModemAnalysis
 		{
 			return fotaStatus switch
 			{
-				0 => "Download successful",
+				0 => "Download successful, wait for upgrade",
 				701 => "HTTP(S) unknown error",
 				702 => "Server connection failed",
 				703 => "Request failed",
