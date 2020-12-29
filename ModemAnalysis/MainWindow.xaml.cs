@@ -20,9 +20,9 @@ namespace ModemAnalysis
         private bool IsConnected = false;
 
 		public bool CheckCereg = true;
-		public int RegVal = 0;
+		public int RegVal = -1;
 
-		readonly string correctFW = "BG96MAR02A07M1G_01.018.01.018";
+		readonly string correctFW = "BG96MAR02A07M1G_01.018.01.018"; //turi sasaju su tuscio apn nusiuntimu
         readonly string unknownStatus = "Unknown";
 		readonly string CheckStatusString = "Check Modem status";
         readonly int newFwIndexInComboBox = 0;
@@ -113,11 +113,6 @@ namespace ModemAnalysis
 		private void Button_CheckModemStatus(object sender, RoutedEventArgs e)
         {
             Comm.CheckModemStatus();
-        }
-
-        private void Button_ModemInit_Click(object sender, RoutedEventArgs e)
-        {
-            Comm.ModemInit(txtBx_APN.Text, txtBx_User.Text, txtBx_Pass.Text);
         }
 
         private void InitPortNames()
@@ -272,7 +267,7 @@ namespace ModemAnalysis
 			if (lastLine.Contains("ID,MODEM")) //means that it is NOT in the TestMode
 			{
 				var matchG1 = Regex.Match(lastLine, "ID,MODEM,([^\"]*);").Groups[1].Value;
-				if (matchG1 == "") lbl_ModVer.Content = "Reconnect after 10s or go to TestMode";
+				if (matchG1 == "") lbl_ModVer.Content = "Reconnect after 10s or click Start Process";
 				else lbl_ModVer.Content = matchG1;
 				ColorModVerLableAccordingly();
 				btn_GoToTestMode.IsEnabled = true;
@@ -352,6 +347,19 @@ namespace ModemAnalysis
 						PrintDebug("Check modem status and try to update modem again.");
 					}
 				}
+			}
+
+			if (lastLine.Contains("DOWNLOADING"))
+			{
+				btn_ModemFwUpdate.IsEnabled = false;
+			}
+			if (lastLine.Contains("UPDATING"))
+			{;
+				btn_ModemFwUpdate.IsEnabled = false;
+			}
+			if (lastLine.Contains("DOWNLOADING"))
+			{
+				btn_ModemFwUpdate.IsEnabled = false;
 			}
 		}
 
@@ -446,7 +454,11 @@ namespace ModemAnalysis
 
         private void ColorModVerLableAccordingly()
 		{
-			if (lbl_ModVer.Content.ToString() == correctFW) lbl_ModVer.Background = Brushes.LightGreen;
+			if (lbl_ModVer.Content.ToString() == correctFW)
+			{
+				lbl_ModVer.Background = Brushes.LightGreen;
+				Comm.ModemApnRestore();
+			} 
 			else lbl_ModVer.Background = Brushes.Tomato;
 		}
 

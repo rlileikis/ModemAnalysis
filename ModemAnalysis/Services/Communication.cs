@@ -171,6 +171,21 @@ namespace ModemAnalysis
 			}
 		}
 
+		public bool ModemApnRestore()
+		{
+			if (serialPort.IsOpen == true)
+			{
+				Thread.Sleep(100);
+				WritePort($"AT+QCFGEXT=\"fota_apn\",0,\"\",\"\",\"\"");
+				Thread.Sleep(100);
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+
 		public bool CheckIfItIsDeviceOrModem()
 		{
 			if (serialPort.IsOpen == true)
