@@ -17,9 +17,12 @@ namespace ModemAnalysis
 	{
 		readonly Communication Comm = new Communication();
    
-        private bool isConnected = false;
+        private bool IsConnected = false;
 
-        readonly string correctFW = "BG96MAR02A07M1G_01.018.01.018";
+		public bool CheckCereg = true;
+		public int RegVal = 0;
+
+		readonly string correctFW = "BG96MAR02A07M1G_01.018.01.018";
         readonly string unknownStatus = "Unknown";
 		readonly string CheckStatusString = "Check Modem status";
         readonly int newFwIndexInComboBox = 0;
@@ -52,7 +55,7 @@ namespace ModemAnalysis
 
         private void Button_Click_Connect(object sender, RoutedEventArgs e)
 		{
-            if (isConnected == false)
+            if (IsConnected == false)
             {
                 OpenPort();
                 Comm.CheckIfItIsDeviceOrModem();
@@ -166,7 +169,7 @@ namespace ModemAnalysis
 				{
 					btn_Connect.Content = "Disconnect";
 					comboBox_PortSelection.IsEnabled = false;
-					isConnected = true;
+					IsConnected = true;
 					PrintDebug($">>> Connected to port {GetPortFromComboList()}");
                     MakeLablesUnknownAgain();
                     return true;
@@ -211,7 +214,7 @@ namespace ModemAnalysis
 		void ClosePort()
         {
             Comm.ClosePort();
-			isConnected = false;
+			IsConnected = false;
             btn_Connect.Content = "Connect";
             comboBox_PortSelection.IsEnabled = true;
 			PrintDebug($">>> Port {GetPortFromComboList()} disconnected");
@@ -258,11 +261,6 @@ namespace ModemAnalysis
 				btn_GoToTestMode.IsEnabled = false;
 			}
 
-			if (lastLine.Contains("COPS"))
-			{
-				var match = Regex.Match(lastLine, "\"([^\"]*)\"").Groups[1].Value;
-				lbl_Operator.Content = match;
-			}
 
 			if (lastLine.Contains("APP"))
 			{
@@ -285,33 +283,40 @@ namespace ModemAnalysis
 			if (lastLine.Contains("CSQ")) //checks signal level
 			{
 				var match = Regex.Match(lastLine, "\\+CSQ:\\ (\\d*),(\\d*)").Groups[1].Value;
+				if (match == "99") match = "--";
 				lbl_Signal.Content = $"{match} out of 31";
 			}
 
 
-			if (lastLine.Contains("REG"))
+			if (lastLine.Contains("CREG"))
 			{   //Faster to firstly match "REG" instead of doing Regex everytime
-				string pattern1 = "REG: (\\d),(\\d),\"[^\"]*\",\"[^\"]*\",(\\d)";
-				string pattern2 = "REG: (\\d),\"[^\"]*\",\"[^\"]*\",(\\d)";
-				string pattern3 = "REG: (\\d)";
+				CheckRegValue(lastLine);
 
-				if (Regex.IsMatch(lastLine, pattern1))
+				if (CheckIfRegIsOk(RegVal)) CheckCereg = false;
+				else CheckCereg = true;
+
+			}
+
+			if (lastLine.Contains("CEREG"))
+			{   //Faster to firstly match "REG" instead of doing Regex everytime
+				if (CheckCereg)
 				{
-					var regVal = int.Parse(Regex.Match(lastLine, pattern1).Groups[2].Value);
-					GetOpStatusString(regVal);
-					ModemFwUpdateButtonStatus(regVal);
+					CheckRegValue(lastLine);
 				}
-				else if (Regex.IsMatch(lastLine, pattern2))
+			}
+
+			GetOpStatusString(RegVal);
+			ModemFwUpdateButtonStatus(RegVal);
+
+
+			if (lastLine.Contains("COPS"))
+			{
+				var match = Regex.Match(lastLine, "\"([^\"]*)\"").Groups[1].Value;
+				if (String.IsNullOrEmpty(match)) lbl_Operator.Content = unknownStatus;
+				else
 				{
-					var regVal = int.Parse(Regex.Match(lastLine, pattern2).Groups[1].Value);
-					GetOpStatusString(regVal);
-					ModemFwUpdateButtonStatus(regVal);
-				}
-				else if (Regex.IsMatch(lastLine, pattern3))
-				{
-					var regVal = int.Parse(Regex.Match(lastLine, pattern3).Groups[1].Value);
-					GetOpStatusString(regVal);
-					ModemFwUpdateButtonStatus(regVal);
+					lbl_Operator.Content = match;
+					//ModemFwUpdateButtonStatus(1); //enablem modem fw button
 				}
 			}
 
@@ -348,6 +353,36 @@ namespace ModemAnalysis
 					}
 				}
 			}
+		}
+
+		private void CheckRegValue(string lastLine)
+		{
+			string pattern1 = "REG: (\\d),(\\d),\"[^\"]*\",\"[^\"]*\",(\\d)";
+			string pattern2 = "REG: (\\d),\"[^\"]*\",\"[^\"]*\",(\\d)";
+			string pattern3 = "REG: (\\d)";
+
+			if (Regex.IsMatch(lastLine, pattern1))
+			{
+				RegVal = int.Parse(Regex.Match(lastLine, pattern1).Groups[2].Value);
+			}
+			else if (Regex.IsMatch(lastLine, pattern2))
+			{
+				RegVal = int.Parse(Regex.Match(lastLine, pattern2).Groups[1].Value);
+			}
+			else if (Regex.IsMatch(lastLine, pattern3))
+			{
+				RegVal = int.Parse(Regex.Match(lastLine, pattern3).Groups[1].Value);
+			}
+		}
+
+		private bool CheckIfRegIsOk(int regVal)
+		{
+			if (regVal == 1 || regVal == 5)
+			{
+				// no need to chech cereg
+				return true;
+			}
+			return false;
 		}
 
 		private void DfotaEndButtonsStatus()
