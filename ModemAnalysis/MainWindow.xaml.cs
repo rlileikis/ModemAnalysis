@@ -467,7 +467,8 @@ namespace ModemAnalysis
             if (Comm.StartDfota(comboBox_DfotaSelection.SelectedIndex))
             {
                 PrintDebug("DFOTA update initiated");
-            }
+				btn_ModemFwUpdate.IsEnabled = false;
+			}
             else
             {
                 PrintDebug("Device is disconnected, trying to reconnect.");

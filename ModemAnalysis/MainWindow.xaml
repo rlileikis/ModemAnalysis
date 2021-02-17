@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ModemAnalysis"
         mc:Ignorable="d"
-        Title="ModemAnalyser v1.1" Height="500" Width="650" MinHeight="500" MinWidth="650" MaxHeight="500" MaxWidth="650" Loaded="MyWindow_Loaded">
+        Title="ModemAnalyser v1.2" Height="500" Width="650" MinHeight="500" MinWidth="650" MaxHeight="500" MaxWidth="650" Loaded="MyWindow_Loaded">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="410"></ColumnDefinition>
