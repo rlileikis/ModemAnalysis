@@ -379,7 +379,10 @@ namespace ModemAnalysis
 			}
 			else if (Regex.IsMatch(lastLine, pattern3))
 			{
-				RegVal = int.Parse(Regex.Match(lastLine, pattern3).Groups[1].Value);
+				if (lastLine == "+CREG: 0,1")
+					RegVal = 1;
+				else
+					RegVal = int.Parse(Regex.Match(lastLine, pattern3).Groups[1].Value);
 			}
 		}
 
@@ -464,7 +467,7 @@ namespace ModemAnalysis
 
 		private void Button_GoToUpdateModemFw(object sender, RoutedEventArgs e)
 		{
-            if (Comm.StartDfota(comboBox_DfotaSelection.SelectedIndex))
+            if (Comm.ModemAPNset(txtBx_APN.Text, txtBx_User.Text, txtBx_Pass.Text) && Comm.StartDfota(comboBox_DfotaSelection.SelectedIndex))
             {
                 PrintDebug("DFOTA update initiated");
 				btn_ModemFwUpdate.IsEnabled = false;
