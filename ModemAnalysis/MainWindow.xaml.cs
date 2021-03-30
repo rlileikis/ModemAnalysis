@@ -55,7 +55,8 @@ namespace ModemAnalysis
 
         private void Button_Click_Connect(object sender, RoutedEventArgs e)
 		{
-            if (IsConnected == false)
+			RegVal = 0;
+			if (IsConnected == false)
             {
                 OpenPort();
                 Comm.CheckIfItIsDeviceOrModem();
@@ -300,8 +301,19 @@ namespace ModemAnalysis
 				}
 			}
 
-			GetOpStatusString(RegVal);
-			ModemFwUpdateButtonStatus(RegVal);
+
+			if (lastLine.Contains("FOTA"))
+			{   //Faster to firstly match "REG" instead of doing Regex everytime
+
+			}
+			else
+			{
+				GetOpStatusString(RegVal);
+				ModemFwUpdateButtonStatus(RegVal);
+			}
+
+
+
 
 
 			if (lastLine.Contains("COPS"))
@@ -398,7 +410,7 @@ namespace ModemAnalysis
 
 		private void DfotaEndButtonsStatus()
 		{
-			btn_ModemFwUpdate.IsEnabled = true;
+			btn_ModemFwUpdate.IsEnabled = false;
 			btn_CheckModemStatus.IsEnabled = true;
 			lbl_ModVer.Content = unknownStatus;
 			lbl_ModVer.Background = Brushes.Transparent;
@@ -460,7 +472,7 @@ namespace ModemAnalysis
 			if (lbl_ModVer.Content.ToString() == correctFW)
 			{
 				lbl_ModVer.Background = Brushes.LightGreen;
-				Comm.ModemApnRestore();
+				Comm.ModemApnRestore(); // patikrinti ar nenoriu downgrade daryti
 			} 
 			else lbl_ModVer.Background = Brushes.Tomato;
 		}
