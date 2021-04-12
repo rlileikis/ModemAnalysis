@@ -1,12 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Management;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
 using static ModemAnalysis.Communication;
+using AutoUpdaterDotNET;
+using Newtonsoft.Json;
+using System.Xml;
+using System.Net;
+
 
 namespace ModemAnalysis
 {
@@ -16,8 +23,13 @@ namespace ModemAnalysis
 	public partial class MainWindow : Window
 	{
 		readonly Communication Comm = new Communication();
-   
-        private bool IsConnected = false;
+		private class AutoUpdateSettings
+		{
+			public bool Enabled { get; set; }
+			public string URL { get; set; }
+		}
+
+		private bool IsConnected = false;
 
 		public bool CheckCereg = true;
 		public int RegVal = -1;
@@ -71,8 +83,76 @@ namespace ModemAnalysis
 
 		private void MyWindow_Loaded(object sender, RoutedEventArgs e)
 		{
+			//get version info
+			Version version = Assembly.GetExecutingAssembly().GetName().Version;
+
+			MyWindow.Title = $"{MyWindow.Title} v{version.Major}.{version.Build}";
+			int currentVer = version.Major * 1000 + version.Build * 10;
+
+			String updateXML = "http://files.trust-track.com/autoupdate/autoupdate.xml";
+
+			string curr_dir = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
+
+			XmlTextReader reader = new XmlTextReader(updateXML);
+			var xmlVal = new List<string>();
+			try
+			{
+				while (reader.Read())
+				{
+					if (reader.NodeType == XmlNodeType.Text)
+					{
+						xmlVal.Add(reader.Value);
+						//PrintDebug(reader.Value);
+					}
+				}
+
+				Int32.TryParse(xmlVal[0].Replace(".", string.Empty), out int newVer); //Software version from XML
+				String updateURL = xmlVal[1];                                        //URL from XML
+
+				if (newVer > currentVer)
+				{
+					Autoupdater(curr_dir, updateURL);
+				}
+			}
+			catch
+			{
+				PrintDebug("If you want to use latest Modem FW update tool, please make sure you have proper internet connection.");
+			}
+
 			PrintDebug("Make sure device is connected to the USB and Power supply");
-        }
+		}
+
+		private static void Autoupdater(string curr_dir, string updateURL)
+		{
+			//updater
+			if (MessageBox.Show("New software version is detected. Do you want to update?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
+			{//If no, then do nothing
+
+			}
+			else
+			{// If yes do then
+				try
+				{
+					if (File.Exists(curr_dir + "\\ModemAnalysis.old"))
+						File.Delete(curr_dir + "\\ModemAnalysis.old");
+
+					System.IO.File.Move("ModemAnalysis.exe", "ModemAnalysis.old");
+
+					WebClient webClient = new WebClient();
+					webClient.DownloadFile(updateURL, curr_dir + "\\ModemAnalysis.exe");
+
+					System.Diagnostics.Process.Start("ModemAnalysis.exe");
+
+					System.Windows.Application.Current.Shutdown();
+				}
+				catch
+				{
+					MessageBox.Show("Update unsuccessful");
+				}
+					
+
+			}
+		}
 
 		private void Button_Click_GoToTestMode(object sender, RoutedEventArgs e)
 		{
