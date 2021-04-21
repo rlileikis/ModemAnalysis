@@ -38,12 +38,16 @@ namespace ModemAnalysis
         readonly string unknownStatus = "Unknown";
 		readonly string CheckStatusString = "Check Modem status";
         readonly int newFwIndexInComboBox = 0;
-        public MainWindow()
+
+		string FWsPath = "http://files.trust-track.com/MFW_files/";
+		string currentModem = "";
+
+
+		public MainWindow()
 		{
             InitializeComponent();
             //Loaded += MyWindow_Loaded;
             InitPortNames();
-            InitDfotaUrls();
             Comm.ProcessReceived += C_ProcessReceived;
 
         }
@@ -79,7 +83,9 @@ namespace ModemAnalysis
                 MakeLablesUnknownAgain();
                 MakeButtonsDisabledAgain();
             }
-        }
+
+			btn_ModemFwUpdate.IsEnabled = true; ///// isimt!!!!!!!!!!!!!!!!!!!!!!!!
+		}
 
 		private void MyWindow_Loaded(object sender, RoutedEventArgs e)
 		{
@@ -119,12 +125,117 @@ namespace ModemAnalysis
 				PrintDebug("If you want to use latest Modem FW update tool, please make sure you have proper internet connection.");
 			}
 
+			//get fw files list
+			//string uri = "https://files.trust-track.com/MFW_files/";
+			//WebRequest request = WebRequest.Create(uri);
+			//WebResponse response = request.GetResponse();
+			//Regex regex = new Regex("<a href=\".*\">(?<name>.*)</a>");
+			//List<string> BG96URLs = new List<string>();
+
+			//using (var urlFileTreeReader = new StreamReader(response.GetResponseStream()))
+			//{
+			//	string result = urlFileTreeReader.ReadToEnd();
+
+			//	MatchCollection matches = regex.Matches(result);
+			//	if (matches.Count == 0)
+			//	{
+			//		PrintDebug("Failed to find modem FW files");
+			//		return;
+			//	}
+
+			//	foreach (Match match in matches)
+			//	{
+			//		//PrintDebug(match.ToString());
+			//		if (!match.Success) { continue; }
+			//		PrintDebug(match.Groups["name"].ToString());
+			//		if (match.Groups["name"].ToString() != "Parent Directory")
+			//		{
+			//			if (!match.Groups["name"].ToString().Contains("."))
+			//			{
+			//				request = WebRequest.Create(uri+match.Groups["name"].ToString());
+			//				response = request.GetResponse();
+
+			//			}
+			//		}
+			//	}
+			//}
+
+			//get modem FWs
+			//string FWsPath = "http://files.trust-track.com/MFW_files/";
+			List<string> FilesInDir = new List<string>();
+			List<string> fwURLs = new List<string>();
+			List<KeyValuePair<string, string>> fwList = new List<KeyValuePair<string, string>>();
+
+
+			FilesInDir = GetFilesInURL(FWsPath, null);
+
+			for (int i = 0; i < FilesInDir.Count; i++)
+			{
+				fwURLs = GetFilesInURL($"{FWsPath}{FilesInDir[i]}/", FilesInDir[i]);
+				for (int z = 0; z < fwURLs.Count; z++)
+				{
+					fwList.Add(new KeyValuePair<string, string>(FilesInDir[i], fwURLs[z]));
+					comboBox_DfotaSelection.Items.Add($"{FilesInDir[i]}, {fwURLs[z]}");
+				}
+			}
+
+			
+
+			//InitHardcodedDfotaUrls();
+
 			PrintDebug("Make sure device is connected to the USB and Power supply");
+			
+		}
+
+		private List<string> GetFilesInURL(string uri,string modemName)
+		{
+			WebRequest request = WebRequest.Create(uri);
+			WebResponse response = request.GetResponse();
+			Regex regex = new Regex("<a href=\".*\">(?<name>.*)</a>");
+			List<string> intFilesInDir = new List<string>();
+
+			using (var urlFileTreeReader = new StreamReader(response.GetResponseStream()))
+			{
+				string result = urlFileTreeReader.ReadToEnd();
+
+				MatchCollection matches = regex.Matches(result);
+				if (matches.Count == 0)
+				{
+					PrintDebug("Failed to find modem FW files");
+					intFilesInDir.Clear();
+					return intFilesInDir;
+				}
+
+				foreach (Match match in matches)
+				{
+					//PrintDebug(match.ToString());
+					if (!match.Success) { continue; }
+					//PrintDebug(match.Groups["name"].ToString());
+
+					if (modemName == null)
+					{
+						if (match.Groups["name"].ToString() != "Parent Directory" || match.Groups["name"].ToString().Contains("."))
+						{
+							if (!match.Groups["name"].ToString().Contains("."))
+							{
+								intFilesInDir.Add(match.Groups["name"].ToString());
+							}
+						}
+					}
+					else if (match.Groups["name"].ToString() != "Parent Directory")
+					{
+						if (match.Groups["name"].ToString().Contains(".bin"))
+						{
+							intFilesInDir.Add(match.Groups["name"].ToString());
+						}
+					}
+				}
+				return intFilesInDir;
+			}
 		}
 
 		private static void Autoupdater(string curr_dir, string updateURL)
 		{
-			//updater
 			if (MessageBox.Show("New software version is detected. Do you want to update?", "Question", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
 			{//If no, then do nothing
 
@@ -226,7 +337,7 @@ namespace ModemAnalysis
         }
 
 
-        private void InitDfotaUrls()
+        private void InitHardcodedDfotaUrls()
 		{
             //https://ruptelafwsa.blob.core.windows.net/fwsa/BG96FW/BG96MAR02A07M1G_01.018.01.018-BG96MAR02A07M1G_01.016.01.016.bin
             //https://ruptelafwsa.blob.core.windows.net/fwsa/BG96FW/BG96MAR02A07M1G_01.016.01.016-BG96MAR02A07M1G_01.018.01.018.bin
@@ -559,8 +670,18 @@ namespace ModemAnalysis
 
 		private void Button_GoToUpdateModemFw(object sender, RoutedEventArgs e)
 		{
-            if (Comm.ModemAPNset(txtBx_APN.Text, txtBx_User.Text, txtBx_Pass.Text) && Comm.StartDfota(comboBox_DfotaSelection.SelectedIndex))
-            {
+			//if (Comm.ModemAPNset(txtBx_APN.Text, txtBx_User.Text, txtBx_Pass.Text) && Comm.StartDfota(comboBox_DfotaSelection.SelectedIndex))
+			//string pattern = "(.*), (.*)";
+			//Regex rg = new Regex(pattern);
+			//MatchCollection matchedAuthors = rg.Matches(comboBox_DfotaSelection.Text);
+			//string dfotaURL = matchedAuthors.Groups[1].Value;
+
+			string dfotaURL = Regex.Match(comboBox_DfotaSelection.Text, "(.*), (.*)").Groups[2].Value;
+			FWsPath = "a";
+
+			if (Comm.ModemAPNset(txtBx_APN.Text, txtBx_User.Text, txtBx_Pass.Text) && Comm.StartDfota($"{FWsPath}/{currentModem}/{dfotaURL}"))
+
+			{
                 PrintDebug("DFOTA update initiated");
 				btn_ModemFwUpdate.IsEnabled = false;
 			}

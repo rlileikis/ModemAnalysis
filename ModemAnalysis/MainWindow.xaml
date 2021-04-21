@@ -42,6 +42,7 @@
         <Label x:Name="lbl_Signal" Content="Unknown" HorizontalAlignment="Left" Margin="82,187,0,0" VerticalAlignment="Top" Height="20" Padding="0" Width="140" Grid.Row="1" RenderTransformOrigin="0.517,1.15" Grid.Column="1"/>
         <Label Content="OpStatus:" HorizontalAlignment="Left" Margin="10,147,0,0" VerticalAlignment="Top" Height="20" Padding="0" Width="auto                " Grid.Row="1" RenderTransformOrigin="0.517,1.15" Grid.Column="1" FontWeight="Bold"/>
         <Label x:Name="lbl_OpStatus" Content="Unknown" HorizontalAlignment="Left" Margin="70,147,0,0" VerticalAlignment="Top" Height="20" Padding="0" Width="152" Grid.Row="1" RenderTransformOrigin="0.517,1.15" Grid.Column="1"/>
+        <CheckBox x:Name="checkBx_RememberLast" Content="Remember last" Grid.Column="1" HorizontalAlignment="Left" Margin="107,384,0,0" Grid.Row="1" VerticalAlignment="Top" IsChecked="True" RenderTransformOrigin="0.5,0.5"/>
 
 
     </Grid>

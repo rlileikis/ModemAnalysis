@@ -109,11 +109,11 @@ namespace ModemAnalysis
 			}
 		}
 
-		public bool StartDfota(int dfotaUrlIndex)
+		public bool StartDfota(string dfotaUrl)
 		{
 			if (serialPort.IsOpen == true)
 			{
-				WritePort($"AT+QFOTADL=\"{DfotaIndexToUrl(dfotaUrlIndex)}\"");
+				WritePort($"AT+QFOTADL=\"{dfotaUrl}\"");
 				return true;
 			}
 			else
