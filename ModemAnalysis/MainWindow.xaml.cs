@@ -37,10 +37,13 @@ namespace ModemAnalysis
 		readonly string correctFW = "BG96MAR02A07M1G_01.018.01.018"; //turi sasaju su tuscio apn nusiuntimu
         readonly string unknownStatus = "Unknown";
 		readonly string CheckStatusString = "Check Modem status";
-        readonly int newFwIndexInComboBox = 0;
+        readonly int firstFwIndexInComboBox = 0;
 
 		string FWsPath = "http://files.trust-track.com/MFW_files/";
 		string currentModem = "";
+
+		List<KeyValuePair<string, string>> fwList = new List<KeyValuePair<string, string>>();
+		List<string> availableModems = new List<string>();
 
 
 		public MainWindow()
@@ -76,7 +79,8 @@ namespace ModemAnalysis
             {
                 OpenPort();
                 Comm.CheckIfItIsDeviceOrModem();
-            }
+				comboBox_DfotaSelection.Items.Clear();
+			}
             else
             {
                 ClosePort();
@@ -125,48 +129,10 @@ namespace ModemAnalysis
 				PrintDebug("If you want to use latest Modem FW update tool, please make sure you have proper internet connection.");
 			}
 
-			//get fw files list
-			//string uri = "https://files.trust-track.com/MFW_files/";
-			//WebRequest request = WebRequest.Create(uri);
-			//WebResponse response = request.GetResponse();
-			//Regex regex = new Regex("<a href=\".*\">(?<name>.*)</a>");
-			//List<string> BG96URLs = new List<string>();
-
-			//using (var urlFileTreeReader = new StreamReader(response.GetResponseStream()))
-			//{
-			//	string result = urlFileTreeReader.ReadToEnd();
-
-			//	MatchCollection matches = regex.Matches(result);
-			//	if (matches.Count == 0)
-			//	{
-			//		PrintDebug("Failed to find modem FW files");
-			//		return;
-			//	}
-
-			//	foreach (Match match in matches)
-			//	{
-			//		//PrintDebug(match.ToString());
-			//		if (!match.Success) { continue; }
-			//		PrintDebug(match.Groups["name"].ToString());
-			//		if (match.Groups["name"].ToString() != "Parent Directory")
-			//		{
-			//			if (!match.Groups["name"].ToString().Contains("."))
-			//			{
-			//				request = WebRequest.Create(uri+match.Groups["name"].ToString());
-			//				response = request.GetResponse();
-
-			//			}
-			//		}
-			//	}
-			//}
-
-			//get modem FWs
-			//string FWsPath = "http://files.trust-track.com/MFW_files/";
+			//get modem FWs PADARYT KAD LOADING BACKGROUNDE
 			List<string> FilesInDir = new List<string>();
 			List<string> fwURLs = new List<string>();
-			List<KeyValuePair<string, string>> fwList = new List<KeyValuePair<string, string>>();
-
-
+			
 			FilesInDir = GetFilesInURL(FWsPath, null);
 
 			for (int i = 0; i < FilesInDir.Count; i++)
@@ -175,16 +141,19 @@ namespace ModemAnalysis
 				for (int z = 0; z < fwURLs.Count; z++)
 				{
 					fwList.Add(new KeyValuePair<string, string>(FilesInDir[i], fwURLs[z]));
-					comboBox_DfotaSelection.Items.Add($"{FilesInDir[i]}, {fwURLs[z]}");
+					//comboBox_DfotaSelection.Items.Add($"{FilesInDir[i]}, {fwURLs[z]}");
 				}
+				if (fwURLs.Count > 0) availableModems.Add(FilesInDir[i]);
 			}
 
-			
-
 			//InitHardcodedDfotaUrls();
+			PrintDebug("Currently supported modems:");
+			foreach (string modem in availableModems)
+			{
+				PrintDebug(modem);
+			}
 
 			PrintDebug("Make sure device is connected to the USB and Power supply");
-			
 		}
 
 		private List<string> GetFilesInURL(string uri,string modemName)
@@ -343,7 +312,7 @@ namespace ModemAnalysis
             //https://ruptelafwsa.blob.core.windows.net/fwsa/BG96FW/BG96MAR02A07M1G_01.016.01.016-BG96MAR02A07M1G_01.018.01.018.bin
             comboBox_DfotaSelection.Items.Add("BG96MAR02A07M1G_01.016.01.016 -> BG96MAR02A07M1G_01.018.01.018.bin"); // ID: 0
             comboBox_DfotaSelection.Items.Add("BG96MAR02A07M1G_01.018.01.018 -> BG96MAR02A07M1G_01.016.01.016.bin"); // ID: 1
-            comboBox_DfotaSelection.SelectedIndex = newFwIndexInComboBox;
+            comboBox_DfotaSelection.SelectedIndex = firstFwIndexInComboBox;
         }
 
 
@@ -465,6 +434,9 @@ namespace ModemAnalysis
 				btn_GoToTestMode.IsEnabled = true;
 				btn_CheckModemStatus.IsEnabled = false;
 				btn_ModemFwUpdate.IsEnabled = false;
+				currentModem = matchG1;
+				InitDFOTAComboBox();
+
 			}
 
 			if (lastLine.Contains("CSQ")) //checks signal level
@@ -564,6 +536,19 @@ namespace ModemAnalysis
 			{
 				btn_ModemFwUpdate.IsEnabled = false;
 			}
+		}
+
+		private void InitDFOTAComboBox()
+		{
+			//if (availableModems.Any(s => currentModem.Contains(s)))
+			//{
+				foreach (var fw in fwList)
+				{
+					if (currentModem.Contains(fw.Key))
+						comboBox_DfotaSelection.Items.Add($"{fw.Value}");
+				}
+			//}
+			comboBox_DfotaSelection.SelectedIndex = firstFwIndexInComboBox;
 		}
 
 		private void CheckRegValue(string lastLine)
